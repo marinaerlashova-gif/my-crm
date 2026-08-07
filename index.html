@@ -532,6 +532,28 @@
       'clients'
     ];
 
+    const TASK_STORAGE_KEYS = [
+      'realty_crm_tasks_cloud_v2',
+      'realty_crm_tasks_cloud',
+      'realty_crm_tasks_v3',
+      'realty_crm_clients_v3_tasks',
+      'realty_crm_tasks_v2',
+      'realty_crm_tasks',
+      'crm_tasks',
+      'tasks'
+    ];
+
+    const COMMENT_STORAGE_KEYS = [
+      'realty_crm_comments_cloud_v2',
+      'realty_crm_comments_cloud',
+      'realty_crm_comments_v3',
+      'realty_crm_clients_v3_comments',
+      'realty_crm_comments_v2',
+      'realty_crm_comments',
+      'crm_comments',
+      'comments'
+    ];
+
     const PERMANENT_CLOUD_URL = 'https://jsonblob.com/api/jsonBlob/019fdca9-7a28-723b-89bc-b5941283a8b4';
     const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
 
@@ -573,17 +595,23 @@
         if (!uniqueMap.has(key)) {
           uniqueMap.set(key, { ...c });
         } else {
-          // Merge non-empty fields into existing entry
+          // Merge non-empty fields into existing entry intelligently
           const existing = uniqueMap.get(key);
-          if (!existing.phone && c.phone) existing.phone = c.phone;
-          if (!existing.name && c.name) existing.name = c.name;
-          if (!existing.budget && c.budget) existing.budget = c.budget;
-          if (!existing.initialPayment && c.initialPayment) existing.initialPayment = c.initialPayment;
-          if (!existing.monthlyPayment && c.monthlyPayment) existing.monthlyPayment = c.monthlyPayment;
-          if (!existing.property && c.property) existing.property = c.property;
-          if (!existing.notes && c.notes) existing.notes = c.notes;
-          if (!existing.paymentTerms && c.paymentTerms) existing.paymentTerms = c.paymentTerms;
-          if (!existing.urgency && c.urgency) existing.urgency = c.urgency;
+          if (c.name && (!existing.name || existing.name === 'Без имени')) existing.name = c.name;
+          if (c.phone && !existing.phone) existing.phone = c.phone;
+          if (c.budget) existing.budget = c.budget;
+          if (c.initialPayment) existing.initialPayment = c.initialPayment;
+          if (c.monthlyPayment) existing.monthlyPayment = c.monthlyPayment;
+          if (c.property) existing.property = c.property;
+          if (c.notes) {
+            if (!existing.notes) existing.notes = c.notes;
+            else if (!existing.notes.includes(c.notes)) existing.notes = existing.notes + ' | ' + c.notes;
+          }
+          if (c.paymentTerms) {
+            if (!existing.paymentTerms) existing.paymentTerms = c.paymentTerms;
+            else if (!existing.paymentTerms.includes(c.paymentTerms)) existing.paymentTerms = existing.paymentTerms + ', ' + c.paymentTerms;
+          }
+          if (c.urgency && c.urgency !== 'normal') existing.urgency = c.urgency;
           if (c.status && c.status !== 'lead') existing.status = c.status;
         }
       });
@@ -591,11 +619,10 @@
       return Array.from(uniqueMap.values());
     }
 
-    // Deep LocalStorage Scanner: scans ALL local storage keys for saved contacts
+    // Deep LocalStorage Scanner: scans ALL local storage keys for saved contacts, tasks, and comments
     function getAllLocalClients() {
       const allClients = [];
       
-      // 1. Scan known storage keys
       STORAGE_KEYS.forEach(key => {
         try {
           const item = localStorage.getItem(key);
@@ -610,7 +637,6 @@
         } catch(e) {}
       });
 
-      // 2. Dynamic scan across ALL keys in localStorage
       try {
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -631,16 +657,113 @@
       return deduplicateClientsList(allClients);
     }
 
+    function getAllLocalTasks() {
+      const taskMap = new Map();
+
+      TASK_STORAGE_KEYS.forEach(key => {
+        try {
+          const item = localStorage.getItem(key);
+          if (item) {
+            const arr = JSON.parse(item);
+            if (Array.isArray(arr)) {
+              arr.forEach(t => {
+                if (t && (t.id || t.title)) {
+                  const id = t.id || ('t_' + String(t.title) + '_' + String(t.date));
+                  if (!taskMap.has(id)) taskMap.set(id, t);
+                }
+              });
+            }
+          }
+        } catch(e) {}
+      });
+
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('task') || key.includes('event'))) {
+            const item = localStorage.getItem(key);
+            if (item) {
+              const parsed = JSON.parse(item);
+              if (Array.isArray(parsed)) {
+                parsed.forEach(t => {
+                  if (t && (t.id || t.title)) {
+                    const id = t.id || ('t_' + String(t.title) + '_' + String(t.date));
+                    if (!taskMap.has(id)) taskMap.set(id, t);
+                  }
+                });
+              }
+            }
+          }
+        }
+      } catch(e) {}
+
+      return Array.from(taskMap.values());
+    }
+
+    function getAllLocalComments() {
+      const commentMap = new Map();
+
+      COMMENT_STORAGE_KEYS.forEach(key => {
+        try {
+          const item = localStorage.getItem(key);
+          if (item) {
+            const arr = JSON.parse(item);
+            if (Array.isArray(arr)) {
+              arr.forEach(c => {
+                if (c && (c.id || c.text)) {
+                  const id = c.id || ('c_' + String(c.clientId) + '_' + String(c.text));
+                  if (!commentMap.has(id)) commentMap.set(id, c);
+                }
+              });
+            }
+          }
+        } catch(e) {}
+      });
+
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('comment') || key.includes('note'))) {
+            const item = localStorage.getItem(key);
+            if (item) {
+              const parsed = JSON.parse(item);
+              if (Array.isArray(parsed)) {
+                parsed.forEach(c => {
+                  if (c && (c.id || c.text)) {
+                    const id = c.id || ('c_' + String(c.clientId) + '_' + String(c.text));
+                    if (!commentMap.has(id)) commentMap.set(id, c);
+                  }
+                });
+              }
+            }
+          }
+        }
+      } catch(e) {}
+
+      return Array.from(commentMap.values());
+    }
+
     function recoverAllLocalContacts() {
-      const found = getAllLocalClients();
-      const combined = deduplicateClientsList([...found, ...clients]);
-      if (combined.length > 0) {
-        clients = combined;
-        saveData();
-        alert(`🎉 Восстановлено контактов из памяти устройства: ${clients.length}! Данные сохранены в облако.`);
-      } else {
-        alert('В локальной памяти устройства новых контактов не найдено.');
+      const foundClients = getAllLocalClients();
+      const foundTasks = getAllLocalTasks();
+      const foundComments = getAllLocalComments();
+
+      clients = deduplicateClientsList([...foundClients, ...clients]);
+
+      if (foundTasks.length) {
+        const taskMap = new Map();
+        [...foundTasks, ...tasks].forEach(t => { if (t && (t.id || t.title)) taskMap.set(t.id || ('t_' + t.title), t); });
+        tasks = Array.from(taskMap.values());
       }
+
+      if (foundComments.length) {
+        const comMap = new Map();
+        [...foundComments, ...comments].forEach(c => { if (c && (c.id || c.text)) comMap.set(c.id || ('c_' + c.text), c); });
+        comments = Array.from(comMap.values());
+      }
+
+      saveData();
+      alert(`🎉 Успешно восстановлено: ${clients.length} контактов, ${tasks.length} задач и ${comments.length} заметок! Всё сохранено в облако.`);
     }
 
     function deleteTestContacts() {
@@ -655,16 +778,8 @@
     }
 
     let clients = getAllLocalClients();
-    let tasks = [];
-    let comments = [];
-
-    try {
-      tasks = JSON.parse(localStorage.getItem('realty_crm_tasks_cloud_v2')) || [];
-    } catch(e) { tasks = []; }
-
-    try {
-      comments = JSON.parse(localStorage.getItem('realty_crm_comments_cloud_v2')) || [];
-    } catch(e) { comments = []; }
+    let tasks = getAllLocalTasks();
+    let comments = getAllLocalComments();
 
     // Notifications & Alarm Engine
     function enablePushNotifications() {
