@@ -188,6 +188,7 @@
           <button class="btn btn-amber" style="background:#f59e0b; color:#fff;" onclick="enablePushNotifications()">🔔 Включить уведомления на телефоне</button>
           <button class="btn btn-emerald" style="background:#10b981; color:#fff;" onclick="openImportModal()">📱 Импортировать контакты (.vcf)</button>
           <button class="btn btn-secondary" style="background:#fff; color:#0f172a;" onclick="recoverAllLocalContacts()" title="Восстановить все контакты из локального хранилища браузера">🔄 Восстановить контакты из памяти</button>
+          <button class="btn btn-secondary" style="background:#fff; color:#dc2626;" onclick="deleteTestContacts()" title="Удалить 5 тестовых демо-клиентов">🗑 Очистить демо-контакты</button>
           <button class="btn btn-primary" style="background:#fff; color:#1e3a8a;" onclick="openClientModal()">+ Добавить клиента</button>
         </div>
       </div>
@@ -639,6 +640,17 @@
       }
     }
 
+    function deleteTestContacts() {
+      if (confirm('Удалить 5 демо-контактов (Иванова, Петров, Смирнов, Соколова, Ковалев)?')) {
+        const testIds = ['cli-1', 'cli-2', 'cli-3', 'cli-4', 'cli-5'];
+        clients = (clients || []).filter(c => c && !testIds.includes(c.id) && !String(c.name || '').includes('Иванова Анна'));
+        tasks = (tasks || []).filter(t => t && !testIds.includes(t.clientId));
+        comments = (comments || []).filter(c => c && !testIds.includes(c.clientId));
+        saveData();
+        alert('Демо-контакты успешно удалены!');
+      }
+    }
+
     let clients = getAllLocalClients();
     let tasks = [];
     let comments = [];
@@ -1034,7 +1046,7 @@
             <div class="client-contact-row">
               <a href="tel:${purePhone}" onclick="event.stopPropagation()">📞 ${c.phone || 'Нет телефона'}</a>
               <div>
-                ${purePhone ? `<a href="https://wa.me/${purePhone}" target="_blank" onclick="event.stopPropagation()" class="social-btn wa-btn">WA</a> <a href="https://t.me/+${purePhone}" target="_blank" onclick="event.stopPropagation()" class="social-btn tg-btn">TG</a>` : ''}
+                ${purePhone ? `<a href="https://api.whatsapp.com/send?phone=${purePhone}" target="_blank" onclick="event.stopPropagation()" class="social-btn wa-btn">WA</a> <a href="https://t.me/+${purePhone}" target="_blank" onclick="event.stopPropagation()" class="social-btn tg-btn">TG</a>` : ''}
               </div>
             </div>
 
@@ -1391,249 +1403,4 @@
           monthlyPayment: document.getElementById('client-monthly-payment').value,
           paymentTerms: document.getElementById('client-payment-terms')?.value || '',
           property: document.getElementById('client-property').value,
-          notes: document.getElementById('client-notes').value
-        };
-        clients.unshift(newClient);
-        if (newClient.notes) {
-          comments.unshift({ id: 'com-' + Date.now(), clientId: newClient.id, text: newClient.notes, date: new Date().toLocaleString('ru-RU') });
-        }
-      }
-
-      closeModals();
-      saveData();
-    }
-
-    function saveTask(e) {
-      e.preventDefault();
-      const editId = document.getElementById('task-edit-id').value;
-      let savedTaskId = editId;
-
-      if (editId) {
-        const idx = tasks.findIndex(x => x.id === editId);
-        if (idx !== -1) {
-          tasks[idx].title = document.getElementById('task-title').value;
-          tasks[idx].type = document.getElementById('task-type').value;
-          tasks[idx].clientId = document.getElementById('task-client-id').value;
-          tasks[idx].date = document.getElementById('task-date').value;
-          tasks[idx].time = document.getElementById('task-time').value;
-          tasks[idx].notes = document.getElementById('task-notes').value;
-        }
-      } else {
-        savedTaskId = 't-' + Date.now();
-        const newTask = {
-          id: savedTaskId,
-          title: document.getElementById('task-title').value,
-          type: document.getElementById('task-type').value,
-          clientId: document.getElementById('task-client-id').value,
-          date: document.getElementById('task-date').value,
-          time: document.getElementById('task-time').value,
-          notes: document.getElementById('task-notes').value,
-          done: false
-        };
-        tasks.unshift(newTask);
-      }
-
-      closeModals();
-      saveData();
-
-      if (window.autoExportToGoogle && savedTaskId) {
-        exportTaskToGoogleCalendar(savedTaskId);
-      }
-      window.autoExportToGoogle = false;
-    }
-
-    function handleVcfUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const text = event.target.result;
-        const cards = text.split(/END:VCARD/i);
-        let count = 0;
-
-        cards.forEach(card => {
-          if (!card.trim()) return;
-          let name = '';
-          let phone = '';
-
-          const lines = card.split(/\r?\n/);
-          lines.forEach(line => {
-            const upper = line.toUpperCase();
-            if (upper.startsWith('FN:') || upper.startsWith('FN;')) {
-              name = line.substring(line.indexOf(':') + 1).trim();
-            } else if (!name && (upper.startsWith('N:') || upper.startsWith('N;'))) {
-              const parts = line.substring(line.indexOf(':') + 1).split(';');
-              name = (parts[1] || '') + ' ' + (parts[0] || '');
-              name = name.trim();
-            } else if (upper.startsWith('TEL') && !phone) {
-              phone = line.substring(line.indexOf(':') + 1).trim();
-            }
-          });
-
-          if (name || phone) {
-            clients.unshift({
-              id: 'cli-' + Date.now() + Math.random(),
-              name: name || 'Контакт из VCF',
-              phone: phone || '',
-              type: 'buyer',
-              status: 'lead',
-              budget: '',
-              initialPayment: '',
-              monthlyPayment: '',
-              property: '',
-              notes: 'Импортировано из телефонной книги'
-            });
-            count++;
-          }
-        });
-
-        alert('Успешно добавлено контактов: ' + count);
-        closeModals();
-        saveData();
-      };
-      reader.readAsText(file);
-    }
-
-    function handleTextImport() {
-      const text = document.getElementById('import-text-input')?.value || '';
-      if (!text.trim()) return;
-
-      const lines = text.split(/\r?\n/);
-      let count = 0;
-
-      lines.forEach(line => {
-        if (!line.trim()) return;
-        const phoneMatch = line.match(/(\+?\d[\d\s\-\(\)]{7,}\d)/);
-        const phone = phoneMatch ? phoneMatch[0].trim() : '';
-        let name = line.replace(phoneMatch ? phoneMatch[0] : '', '').replace(/[\-:,]/g, ' ').trim();
-
-        if (!name && phone) name = 'Контакт ' + phone;
-
-        if (name || phone) {
-          clients.unshift({
-            id: 'cli-' + Date.now() + Math.random(),
-            name: name || 'Импортированный контакт',
-            phone: phone || '',
-            type: 'buyer',
-            status: 'lead',
-            budget: '',
-            initialPayment: '',
-            monthlyPayment: '',
-            property: '',
-            notes: 'Импортировано из текста'
-          });
-          count++;
-        }
-      });
-
-      alert('Успешно импортировано контактов: ' + count);
-      closeModals();
-      saveData();
-    }
-
-    function openDetailModal(clientId) {
-      const client = (clients || []).find(c => c && c.id === clientId);
-      if (!client) return;
-
-      const titleEl = document.getElementById('detail-client-name');
-      if (titleEl) titleEl.innerText = client.name || 'Без имени';
-      
-      const clientComments = (comments || []).filter(c => c && c.clientId === clientId);
-      const clientTasks = (tasks || []).filter(t => t && t.clientId === clientId);
-
-      const modalBody = document.getElementById('detail-modal-body');
-      if (!modalBody) return;
-
-      const statusKey = client.status || 'lead';
-      const roleText = client.type === 'seller' ? 'Продавец' : 'Покупатель';
-      const purePhone = cleanPhone(client.phone);
-
-      modalBody.innerHTML = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:12px; margin-bottom:16px; font-size:13px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
-            <div>
-              <span class="role-badge" style="margin-left:0; font-size:11px;">${roleText}</span>
-              <span class="status-tag status-${statusKey}" style="margin-left:6px;">${STATUS_MAP[statusKey] || statusKey}</span>
-            </div>
-            <div style="display:flex; gap:6px;">
-              ${purePhone ? `
-                <a href="https://wa.me/${purePhone}" target="_blank" class="social-btn wa-btn">WhatsApp</a>
-                <a href="https://t.me/+${purePhone}" target="_blank" class="social-btn tg-btn">Telegram</a>
-              ` : ''}
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-            <div>📞 Телефон: <strong>${client.phone ? `<a href="tel:${purePhone}" style="text-decoration:none; color:#2563eb;">${client.phone}</a>` : 'Не указан'}</strong></div>
-            <div>💰 Бюджет: <strong style="color:#059669;">${client.budget || 'Не указан'}</strong></div>
-            ${client.initialPayment ? `<div>💳 Первоначальный взнос (ПВ): <strong>${client.initialPayment}</strong></div>` : ''}
-            ${client.monthlyPayment ? `<div>📅 Ежемесячный платеж: <strong>${client.monthlyPayment}</strong></div>` : ''}
-          </div>
-
-          ${client.paymentTerms ? `<div style="margin-top:4px;">💳 Условия покупки: ${client.paymentTerms.split(',').map(t => `<span class="tag-badge" onclick="closeModals(); setHashtagSearch('${t.trim()}')">${t.trim()}</span>`).join(' ')}</div>` : ''}
-          ${client.property ? `<div style="margin-top:4px;">🏢 Запрос по недвижимости: <strong>${client.property}</strong></div>` : ''}
-          ${client.notes ? `<div style="margin-top:8px; background:#fff; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0; color:#475569;">📝 Примечания: ${client.notes}</div>` : ''}
-
-          <div style="margin-top:12px; display:flex; gap:8px; border-top:1px solid #e2e8f0; padding-top:10px; flex-wrap:wrap;">
-            <button class="btn btn-secondary" style="font-size:11px; padding:5px 12px;" onclick="openEditClientModal('${client.id}')">✏️ Редактировать клиента</button>
-            <button class="btn btn-emerald" style="font-size:11px; padding:5px 12px;" onclick="openTaskModal('${client.id}')">📅 + Запланировать задачу</button>
-          </div>
-        </div>
-
-        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px; color:#0f172a;">📅 Запланированные задачи (${clientTasks.length})</h4>
-        <div style="margin-bottom:16px;">
-          ${clientTasks.map(t => `
-            <div style="background:#fff; border:1px solid #e2e8f0; padding:10px 12px; border-radius:10px; margin-bottom:6px; font-size:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <div>
-                <div style="font-weight:700; font-size:13px; color:#0f172a;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title || 'Задача'}</div>
-                <div style="color:#64748b; font-size:11px; margin-top:2px;">📅 ${t.date || ''} в ${t.time || '12:00'} ${t.notes ? '• ' + t.notes : ''}</div>
-              </div>
-              <div style="display:flex; gap:4px; align-items:center;">
-                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Редактировать</button>
-                <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
-                <span style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
-              </div>
-            </div>
-          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic; padding:8px; background:#f8fafc; border-radius:8px; text-align:center;">Задач по этому клиенту пока нет</div>'}
-        </div>
-
-        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px; color:#0f172a;">💬 Добавить заметку / результат взаимодействия</h4>
-        <div style="display:flex; gap:8px; margin-bottom:16px;">
-          <input type="text" id="new-comment-input" class="form-control" placeholder="Напишите комментарий или результат показа...">
-          <button class="btn btn-primary" onclick="addComment('${client.id}')">Отправить</button>
-        </div>
-
-        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px; color:#0f172a;">📜 История заметок (${clientComments.length})</h4>
-        <div>
-          ${clientComments.map(c => `
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; margin-bottom:8px; font-size:12px;">
-              <div style="color:#64748b; font-size:10px; margin-bottom:4px;">${c.date || ''}</div>
-              <div style="color:#0f172a;">${c.text || ''}</div>
-            </div>
-          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic; padding:8px; text-align:center;">Заметок пока нет</div>'}
-        </div>
-      `;
-
-      document.getElementById('modal-detail')?.classList.add('active');
-    }
-
-    function addComment(clientId) {
-      const input = document.getElementById('new-comment-input');
-      if (!input || !input.value.trim()) return;
-      comments.unshift({
-        id: 'com-' + Date.now(),
-        clientId: clientId,
-        text: input.value.trim(),
-        date: new Date().toLocaleString('ru-RU')
-      });
-      saveData();
-      openDetailModal(clientId);
-    }
-
-    // Init
-    render();
-    loadCloudData();
-  </script>
-</body>
-</html>
+          notes: 
