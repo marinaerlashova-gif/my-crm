@@ -71,8 +71,8 @@
     .card-box { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
     .box-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
 
-    /* Clients List & Cards */
-    .clients-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    /* Clients List & Cards - SINGLE COLUMN STACK (друг под другом) */
+    .clients-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
     .client-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; transition: all 0.2s; position: relative; }
     .client-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
@@ -99,7 +99,7 @@
     .client-info-item { font-size: 12px; color: #64748b; margin-top: 4px; }
     .client-info-item strong { color: #0f172a; }
 
-    .card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 6px; }
+    .card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 6px; flex-wrap: wrap; }
 
     /* Task Item */
     .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; background: #fff; }
@@ -227,8 +227,15 @@
     <!-- TAB 2: CLIENTS LIST -->
     <div id="tab-clients" class="tab-content" style="display:none;">
       <div class="card-box" style="padding: 14px; margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <input type="text" id="client-search" class="form-control" placeholder="🔍 Поиск по ФИО, телефону, бюджету..." style="max-width: 300px;" oninput="renderClients()">
-        <select id="status-filter" class="form-control" style="max-width: 180px;" onchange="renderClients()">
+        <input type="text" id="client-search" class="form-control" placeholder="🔍 Поиск по ФИО, телефону, бюджету..." style="max-width: 250px;" oninput="renderClients()">
+        
+        <select id="sort-order" class="form-control" style="max-width: 200px;" onchange="renderClients()">
+          <option value="name_asc">🔤 По алфавиту (А ➔ Я)</option>
+          <option value="name_desc">🔤 По алфавиту (Я ➔ А)</option>
+          <option value="newest">⏱ Сначала новые</option>
+        </select>
+
+        <select id="status-filter" class="form-control" style="max-width: 160px;" onchange="renderClients()">
           <option value="all">Все статусы</option>
           <option value="lead">Новый лид</option>
           <option value="in_progress">В работе</option>
@@ -236,12 +243,13 @@
           <option value="negotiation">Переговоры</option>
           <option value="deal">Сделка</option>
         </select>
+
         <button class="btn btn-emerald" style="margin-left: auto;" onclick="openImportModal()">📱 Импорт контактов</button>
         <button class="btn btn-primary" onclick="openClientModal()">+ Добавить клиента</button>
       </div>
 
       <div class="clients-grid" id="clients-container">
-        <!-- Client cards rendered here -->
+        <!-- Client cards rendered here in single column stack -->
       </div>
     </div>
 
@@ -501,7 +509,10 @@
 
     function renderRecentClients() {
       const container = document.getElementById('recent-clients-list');
-      container.innerHTML = clients.slice(0, 5).map(c => `
+      // Sort alphabetically for recent list
+      const sorted = [...clients].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru', { sensitivity: 'base' }));
+
+      container.innerHTML = sorted.slice(0, 5).map(c => `
         <div style="padding:10px; border-bottom:1px solid #f1f5f9; cursor:pointer;" onclick="openDetailModal('${c.id}')">
           <div style="font-weight:700; font-size:13px; color:#0f172a;">${c.name}</div>
           <div style="font-size:11px; color:#64748b;">${c.phone} • <strong style="color:#059669;">${c.budget || ''}</strong></div>
@@ -515,12 +526,20 @@
       const container = document.getElementById('clients-container');
       const search = (document.getElementById('client-search')?.value || '').toLowerCase();
       const filter = document.getElementById('status-filter')?.value || 'all';
+      const sortOrder = document.getElementById('sort-order')?.value || 'name_asc';
 
-      const filtered = clients.filter(c => {
+      let filtered = clients.filter(c => {
         if (filter !== 'all' && c.status !== filter) return false;
         if (search && !c.name.toLowerCase().includes(search) && !c.phone.includes(search)) return false;
         return true;
       });
+
+      // Sorting
+      if (sortOrder === 'name_asc') {
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru', { sensitivity: 'base' }));
+      } else if (sortOrder === 'name_desc') {
+        filtered.sort((a, b) => (b.name || '').localeCompare(a.name || '', 'ru', { sensitivity: 'base' }));
+      }
 
       if (!filtered.length) {
         container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#94a3b8;">Клиенты не найдены</div>';
@@ -550,7 +569,7 @@
             ${c.property ? `<div class="client-info-item">🏢 Запрос: <strong>${c.property}</strong></div>` : ''}
 
             <div class="card-footer">
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки & Задачи</button>
               <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditClientModal('${c.id}')">✏️ Редактировать</button>
               <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px; color:#dc2626;" onclick="deleteClient('${c.id}')">Удалить</button>
             </div>
@@ -570,7 +589,9 @@
       ];
 
       container.innerHTML = stages.map(s => {
-        const stageClients = clients.filter(c => c.status === s.key);
+        let stageClients = clients.filter(c => c.status === s.key);
+        stageClients.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru', { sensitivity: 'base' }));
+
         return `
           <div class="kanban-col">
             <div class="kanban-title">
@@ -906,3 +927,4 @@
   </script>
 </body>
 </html>
+,path:/home/user/RealtyCRM.html}
