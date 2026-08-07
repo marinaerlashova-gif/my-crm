@@ -27,6 +27,9 @@
     .brand-title { font-weight: 800; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 6px; }
     .badge-pro { background: #eff6ff; color: #2563eb; font-size: 10px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; border: 1px solid #bfdbfe; font-weight: 700; }
 
+    .sync-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
+    .sync-online { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+
     /* Navigation Tabs */
     nav { display: flex; gap: 6px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
     .nav-btn { border: none; background: transparent; padding: 6px 14px; font-size: 13px; font-weight: 600; color: #475569; border-radius: 7px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
@@ -150,7 +153,7 @@
       </nav>
 
       <div class="actions-area">
-        <button class="btn btn-purple" onclick="exportBackup()" title="Скачать копию базы для передачи на телефон">🔄 Синхронизация / Бэкап</button>
+        <div id="sync-badge" class="sync-status sync-online">☁️ Авто-Синхронизация</div>
         <button class="btn btn-emerald" onclick="openImportModal()">📱 Импорт контактов</button>
         <button class="btn btn-secondary" onclick="openTaskModal()">+ Задача</button>
         <button class="btn btn-primary" onclick="openClientModal()">+ Клиент</button>
@@ -165,11 +168,11 @@
       <!-- Welcome Banner -->
       <div class="banner">
         <h1>Рабочий день риелтора</h1>
-        <p>Ведение клиентов, импорт контактов со смартфона, подборки объектов, хронология комментариев и показы в одном месте.</p>
+        <p>Облачная синхронизация между ПК и телефоном, импорт контактов, подборки объектов и показы.</p>
         <div class="banner-btns">
-          <button class="btn btn-purple" style="background:#8b5cf6; color:#fff;" onclick="exportBackup()">🔄 Перенести базу с ПК на телефон</button>
           <button class="btn btn-emerald" style="background:#10b981; color:#fff;" onclick="openImportModal()">📱 Импортировать телефонную книгу (.vcf)</button>
           <button class="btn btn-primary" style="background:#fff; color:#1e3a8a;" onclick="openClientModal()">+ Добавить нового клиента</button>
+          <button class="btn btn-secondary" style="background:rgba(255,255,255,0.2); color:#fff;" onclick="openTaskModal()">📅 Запланировать показ</button>
         </div>
       </div>
 
@@ -233,8 +236,7 @@
           <option value="negotiation">Переговоры</option>
           <option value="deal">Сделка</option>
         </select>
-        <button class="btn btn-purple" style="margin-left: auto;" onclick="exportBackup()">💾 Скачать бэкап базы</button>
-        <button class="btn btn-emerald" onclick="openImportModal()">📱 Импорт контактов</button>
+        <button class="btn btn-emerald" style="margin-left: auto;" onclick="openImportModal()">📱 Импорт контактов</button>
         <button class="btn btn-primary" onclick="openClientModal()">+ Добавить клиента</button>
       </div>
 
@@ -264,34 +266,6 @@
     </div>
 
   </main>
-
-  <!-- MODAL: SYNC / BACKUP -->
-  <div class="modal-overlay" id="modal-sync">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>🔄 Перенос базы между компьютером и телефоном</h3>
-        <button class="modal-close" onclick="closeModals()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div style="font-size:12px; color:#475569; margin-bottom:16px; line-height:1.5;">
-          Чтобы скопировать всех внесенных клиентов и задачи с компьютера на телефон (или наоборот):
-        </div>
-
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:12px; margin-bottom:14px;">
-          <h4 style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:4px;">Шаг 1: На устройстве, где обновлены клиенты</h4>
-          <p style="font-size:11px; color:#64748b; margin-bottom:10px;">Нажмите кнопку ниже, чтобы скачать файл полной резервной копии:</p>
-          <button class="btn btn-purple" style="width:100%; justify-content:center;" onclick="downloadBackupFile()">💾 Скачать базу (`crm_data.json`)</button>
-        </div>
-
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:12px;">
-          <h4 style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:4px;">Шаг 2: На втором устройстве (например, на телефоне)</h4>
-          <p style="font-size:11px; color:#64748b; margin-bottom:10px;">Отправьте скачанный файл себе в Telegram/WhatsApp, откройте CRM на телефоне и загрузите файл:</p>
-          <input type="file" id="restore-file-input" accept=".json" style="display:none;" onchange="handleRestoreBackup(event)">
-          <button class="btn btn-emerald" style="width:100%; justify-content:center;" onclick="document.getElementById('restore-file-input').click()">📥 Загрузить файл базы в CRM</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL: IMPORT CONTACTS FROM PHONE / VCF -->
   <div class="modal-overlay" id="modal-import">
@@ -431,9 +405,9 @@
 
   <script>
     // State
-    const STORAGE_KEY_CLIENTS = 'realty_crm_clients_v2';
-    const STORAGE_KEY_TASKS = 'realty_crm_tasks_v2';
-    const STORAGE_KEY_COMMENTS = 'realty_crm_comments_v2';
+    const STORAGE_KEY_CLIENTS = 'realty_crm_clients_cloud';
+    const STORAGE_KEY_TASKS = 'realty_crm_tasks_cloud';
+    const STORAGE_KEY_COMMENTS = 'realty_crm_comments_cloud';
 
     const STATUS_MAP = {
       lead: 'Новый лид',
@@ -445,23 +419,50 @@
 
     let clients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [
       { id: '1', name: 'Иванова Анна Сергеевна', phone: '+7 (911) 234-56-78', type: 'buyer', status: 'viewing', budget: '14 500 000 ₽', property: '2-к квартира, Приморский р-н', notes: 'Ищет евро-двушку от 2018 г.' },
-      { id: '2', name: 'Петров Дмитрий Вадимович', phone: '+7 (921) 987-65-43', type: 'seller', status: 'in_progress', budget: '22 000 000 ₽', property: '3-к квартира на Московском пр.', notes: 'Продает 3-к квартиру 88 кв.м.' },
-      { id: '3', name: 'Смирнов Максим Алексеевич', phone: '+7 (905) 555-12-34', type: 'buyer', status: 'lead', budget: '8 000 000 ₽', property: 'Студия под инвестиции', notes: 'Рассматривает семейную ипотеку' }
+      { id: '2', name: 'Петров Дмитрий Вадимович', phone: '+7 (921) 987-65-43', type: 'seller', status: 'in_progress', budget: '22 000 000 ₽', property: '3-к квартира на Московском пр.', notes: 'Продает 3-к квартиру 88 кв.м.' }
     ];
 
     let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [
-      { id: 't1', title: 'Показ квартиры Анна Ивановой', clientId: '1', date: new Date().toISOString().split('T')[0], time: '14:00', done: false, notes: 'Встреча у 3 подъезда' },
-      { id: 't2', title: 'Звонок Дмитрию Петрову (отчет)', clientId: '2', date: new Date().toISOString().split('T')[0], time: '17:30', done: false, notes: 'Рассказать про просмотры с Авито' }
+      { id: 't1', title: 'Показ квартиры Анна Ивановой', clientId: '1', date: new Date().toISOString().split('T')[0], time: '14:00', done: false, notes: 'Встреча у 3 подъезда' }
     ];
 
     let comments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [
       { id: 'c1', clientId: '1', text: 'Провели созвон. Клиентка готова к просмотру в субботу.', date: '2026-08-05 14:20' }
     ];
 
-    function saveData() {
+    // Cloud Data Sync with Node Backend on Render
+    async function loadCloudData() {
+      try {
+        const res = await fetch('/api/db');
+        if (res.ok) {
+          const cloudData = await res.json();
+          if (cloudData.clients && cloudData.clients.length) {
+            clients = cloudData.clients;
+          }
+          if (cloudData.tasks) tasks = cloudData.tasks;
+          if (cloudData.comments) comments = cloudData.comments;
+          render();
+        }
+      } catch (err) {
+        console.log('Running in local/offline mode');
+      }
+    }
+
+    async function saveData() {
       localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
       localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
       localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(comments));
+
+      try {
+        await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clients, tasks, comments })
+        });
+      } catch (err) {
+        // Fallback local
+      }
+
       render();
     }
 
@@ -661,48 +662,6 @@
       document.getElementById('modal-task').classList.add('active');
     }
 
-    function exportBackup() {
-      document.getElementById('modal-sync').classList.add('active');
-    }
-
-    function downloadBackupFile() {
-      const backupData = {
-        clients: clients,
-        tasks: tasks,
-        comments: comments,
-        exportedAt: new Date().toISOString()
-      };
-      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `crm_backup_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function handleRestoreBackup(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        try {
-          const data = JSON.parse(event.target.result);
-          if (data.clients) clients = data.clients;
-          if (data.tasks) tasks = data.tasks;
-          if (data.comments) comments = data.comments;
-
-          saveData();
-          closeModals();
-          alert('База клиентов и задач успешно синхронизирована!');
-        } catch (err) {
-          alert('Ошибка чтения файла бэкапа');
-        }
-      };
-      reader.readAsText(file);
-    }
-
     function closeModals() {
       document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
     }
@@ -878,6 +837,7 @@
 
     // Init
     render();
+    loadCloudData();
   </script>
 </body>
 </html>
