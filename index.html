@@ -933,6 +933,9 @@
 
     async function loadCloudData() {
       const localClients = getAllLocalClients();
+      const localTasks = getAllLocalTasks();
+      const localComments = getAllLocalComments();
+
       let cloudData = null;
 
       const primaryUrl = (window.location.hostname.includes('onrender.com')) ? '/api/db' : RENDER_CLOUD_URL;
@@ -966,20 +969,29 @@
         const cloudTasks = cloudData.tasks || [];
         const cloudComments = cloudData.comments || [];
 
-        const rawCombined = [...cloudClients, ...localClients];
+        // PRESERVE LOCAL USER EDITS FIRST (names, budget, notes, payment terms, urgency), then merge cloud contacts!
+        const rawCombined = [...localClients, ...cloudClients];
         clients = deduplicateClientsList(rawCombined);
 
-        if (cloudTasks.length) {
-          const taskMap = new Map();
-          [...cloudTasks, ...tasks].forEach(t => { if (t && t.id) taskMap.set(t.id, t); });
-          tasks = Array.from(taskMap.values());
-        }
+        // Merge comments (local user comments first)
+        const comMap = new Map();
+        [...localComments, ...cloudComments, ...comments].forEach(c => {
+          if (c && (c.id || c.text)) {
+            const id = c.id || ('c_' + String(c.clientId) + '_' + String(c.text));
+            if (!comMap.has(id)) comMap.set(id, c);
+          }
+        });
+        comments = Array.from(comMap.values());
 
-        if (cloudComments.length) {
-          const comMap = new Map();
-          [...cloudComments, ...comments].forEach(c => { if (c && c.id) comMap.set(c.id, c); });
-          comments = Array.from(comMap.values());
-        }
+        // Merge tasks (local user tasks first)
+        const taskMap = new Map();
+        [...localTasks, ...cloudTasks, ...tasks].forEach(t => {
+          if (t && (t.id || t.title)) {
+            const id = t.id || ('t_' + String(t.title) + '_' + String(t.date));
+            if (!taskMap.has(id)) taskMap.set(id, t);
+          }
+        });
+        tasks = Array.from(taskMap.values());
 
         saveDataLocally();
         render();
