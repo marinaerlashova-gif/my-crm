@@ -378,7 +378,7 @@
             <label>Дополнительные примечания / Требования</label>
             <textarea id="client-notes" class="form-control" rows="3" placeholder="Созвонились, рассматривают ипотеку от Сбербанка..."></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; justify-center;">💾 Сохранить изменения</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">💾 Сохранить изменения</button>
         </form>
       </div>
     </div>
@@ -588,10 +588,12 @@
 
     setInterval(checkUpcomingTaskAlarms, 60000);
 
-    // Export Task to Google Calendar / iCal
+    // Export Task to Google Calendar / iCal with Client Details
     function exportTaskToGoogleCalendar(taskId) {
       const t = (tasks || []).find(x => x && x.id === taskId);
       if (!t) return;
+
+      const client = (clients || []).find(c => c && c.id === t.clientId);
 
       const dateClean = (t.date || '').replace(/-/g, '');
       const timeClean = (t.time || '12:00').replace(':', '') + '00';
@@ -601,8 +603,25 @@
       const endH = String((h + 1) % 24).padStart(2, '0');
       const endIso = `${dateClean}T${endH}${String(m).padStart(2, '0')}00`;
 
-      const title = encodeURIComponent(`${TASK_TYPE_ICONS[t.type] || ''} ${t.title || 'Задача'}`);
-      const details = encodeURIComponent(t.notes || 'RealtyCRM');
+      const rawIcon = TASK_TYPE_ICONS[t.type] || '📌';
+      const typeIcon = rawIcon.split(' ')[0] || '📌';
+      const clientNameTag = client && client.name ? ` — ${client.name}` : '';
+      const title = encodeURIComponent(`${typeIcon} ${t.title || 'Задача'}${clientNameTag}`);
+
+      let detailsLines = [];
+      if (client) {
+        detailsLines.push(`👤 Клиент: ${client.name || 'Без имени'}`);
+        if (client.phone) detailsLines.push(`📞 Телефон: ${client.phone}`);
+        if (client.budget) detailsLines.push(`💰 Бюджет: ${client.budget}`);
+        if (client.property) detailsLines.push(`🏢 Запрос: ${client.property}`);
+        detailsLines.push('');
+      }
+      if (t.notes) {
+        detailsLines.push(`📝 Детали задачи:\n${t.notes}`);
+      }
+      detailsLines.push('\n---\nRealtyCRM Pro');
+
+      const details = encodeURIComponent(detailsLines.join('\n'));
 
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
       window.open(url, '_blank');
@@ -612,17 +631,35 @@
       const t = (tasks || []).find(x => x && x.id === taskId);
       if (!t) return;
 
+      const client = (clients || []).find(c => c && c.id === t.clientId);
+
       const dateClean = (t.date || '').replace(/-/g, '');
       const timeClean = (t.time || '12:00').replace(':', '') + '00';
       const startIso = `${dateClean}T${timeClean}Z`;
+
+      const rawIcon = TASK_TYPE_ICONS[t.type] || '📌';
+      const typeIcon = rawIcon.split(' ')[0] || '📌';
+      const clientNameTag = client && client.name ? ` — ${client.name}` : '';
+      const summary = `${typeIcon} ${t.title || 'Задача'}${clientNameTag}`;
+
+      let detailsLines = [];
+      if (client) {
+        detailsLines.push(`Клиент: ${client.name || 'Без имени'}`);
+        if (client.phone) detailsLines.push(`Тел: ${client.phone}`);
+        if (client.budget) detailsLines.push(`Бюджет: ${client.budget}`);
+        if (client.property) detailsLines.push(`Запрос: ${client.property}`);
+      }
+      if (t.notes) {
+        detailsLines.push(`Детали: ${t.notes}`);
+      }
 
       const icalContent = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
         'PRODID:-//RealtyCRM Pro//RU',
         'BEGIN:VEVENT',
-        `SUMMARY:${TASK_TYPE_ICONS[t.type] || ''} ${t.title || 'Задача'}`,
-        `DESCRIPTION:${t.notes || 'Событие RealtyCRM'}`,
+        `SUMMARY:${summary}`,
+        `DESCRIPTION:${detailsLines.join(' | ')}`,
         `DTSTART:${startIso}`,
         `DTEND:${startIso}`,
         'END:VEVENT',
