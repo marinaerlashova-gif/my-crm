@@ -386,15 +386,28 @@
     </div>
   </div>
 
-  <!-- MODAL: ADD TASK -->
+  <!-- MODAL: ADD / EDIT TASK -->
   <div class="modal-overlay" id="modal-task">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Запланировать задачу / Показ</h3>
+        <h3 id="task-modal-title">Запланировать задачу / Показ</h3>
         <button class="modal-close" onclick="closeModals()">&times;</button>
       </div>
       <div class="modal-body">
         <form onsubmit="saveTask(event)">
+          <input type="hidden" id="task-edit-id" value="">
+          
+          <div class="form-group">
+            <label>Тип события</label>
+            <select id="task-type" class="form-control">
+              <option value="viewing">🏢 Показ объекта</option>
+              <option value="call">📞 Звонок / Созвон</option>
+              <option value="meeting">🤝 Встреча / Переговоры</option>
+              <option value="doc">📄 Подготовка документов / Задаток</option>
+              <option value="other">📌 Другое</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label>Название задачи *</label>
             <input type="text" id="task-title" class="form-control" required placeholder="Показ квартиры на Комендантском">
@@ -417,7 +430,7 @@
             <label>Детали / Описание</label>
             <textarea id="task-notes" class="form-control" rows="2" placeholder="Ключи у консьержа, встреча возле 2 подъезда"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Сохранить задачу</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">💾 Сохранить задачу</button>
         </form>
       </div>
     </div>
@@ -452,6 +465,14 @@
       not_relevant: '❌ Не актуально'
     };
 
+    const TASK_TYPE_ICONS = {
+      viewing: '🏢 Показ',
+      call: '📞 Звонок',
+      meeting: '🤝 Встреча',
+      doc: '📄 Документы',
+      other: '📌 Задача'
+    };
+
     let clients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
     let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
     let comments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [];
@@ -465,7 +486,7 @@
 
       Notification.requestPermission().then(permission => {
         if (permission === "granted") {
-          alert("🔔 Уведомления включены! Приложение будет напоминать вам о показах и встречах.");
+          alert("🔔 Уведомления включены! Приложение будет напоминать вам о показах и звонках.");
           new Notification("RealtyCRM Pro", {
             body: "Уведомления успешно подключены! Мы напомним вам о ближайших показах.",
             icon: "🏢"
@@ -490,11 +511,10 @@
         const taskTimeMin = h * 60 + m;
         const diff = taskTimeMin - nowTimeMin;
 
-        // Alarm if task is in 15 minutes
         if (diff === 15 && !t.notified) {
           t.notified = true;
-          new Notification("⏰ Напоминание о показе!", {
-            body: `${t.title} через 15 минут в ${t.time}!`,
+          new Notification("⏰ Напоминание о событии!", {
+            body: `${TASK_TYPE_ICONS[t.type] || ''} ${t.title} через 15 минут в ${t.time}!`,
             icon: "🏢"
           });
         }
@@ -516,8 +536,8 @@
       const endH = String((h + 1) % 24).padStart(2, '0');
       const endIso = `${dateClean}T${endH}${String(m).padStart(2, '0')}00`;
 
-      const title = encodeURIComponent(t.title);
-      const details = encodeURIComponent(t.notes || 'Показ недвижимости RealtyCRM');
+      const title = encodeURIComponent(`${TASK_TYPE_ICONS[t.type] || ''} ${t.title}`);
+      const details = encodeURIComponent(t.notes || 'RealtyCRM');
 
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
       window.open(url, '_blank');
@@ -536,8 +556,8 @@
         'VERSION:2.0',
         'PRODID:-//RealtyCRM Pro//RU',
         'BEGIN:VEVENT',
-        `SUMMARY:${t.title}`,
-        `DESCRIPTION:${t.notes || 'Показ недвижимости'}`,
+        `SUMMARY:${TASK_TYPE_ICONS[t.type] || ''} ${t.title}`,
+        `DESCRIPTION:${t.notes || 'Событие RealtyCRM'}`,
         `DTSTART:${startIso}`,
         `DTEND:${startIso}`,
         'END:VEVENT',
@@ -553,7 +573,7 @@
       URL.revokeObjectURL(url);
     }
 
-    // Cloud Data Sync with Smart Merge & Local Backup
+    // Cloud Data Sync
     async function loadCloudData() {
       const localClients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
       const localTasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
@@ -568,18 +588,16 @@
           const cloudComments = cloudData.comments || [];
 
           if (cloudClients.length > 0) {
-            // Cloud has data -> merge with local
             const clientMap = new Map();
             [...cloudClients, ...localClients].forEach(c => clientMap.set(c.id, c));
             clients = Array.from(clientMap.values());
             tasks = cloudTasks.length ? cloudTasks : localTasks;
             comments = cloudComments.length ? cloudComments : localComments;
           } else if (localClients.length > 0) {
-            // Cloud was reset or empty, but device HAS contacts -> restore Cloud from Local!
             clients = localClients;
             tasks = localTasks;
             comments = localComments;
-            await pushLocalToCloud(); // Restore Cloud DB automatically!
+            await pushLocalToCloud();
           }
 
           saveDataLocally();
@@ -637,7 +655,7 @@
       const todayTasks = tasks.filter(t => t.date === todayStr);
 
       if (!todayTasks.length) {
-        container.innerHTML = '<div style="text-align:center; padding: 20px; color:#94a3b8; font-size:13px;">На сегодня нет невыполненных показов или звонков.</div>';
+        container.innerHTML = '<div style="text-align:center; padding: 20px; color:#94a3b8; font-size:13px;">На сегодня нет невыполненных задач.</div>';
         return;
       }
 
@@ -647,12 +665,13 @@
           <div class="task-item ${t.done ? 'done' : ''}">
             <input type="checkbox" class="task-checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
             <div style="flex:1;">
-              <div class="task-title">${t.title}</div>
+              <div class="task-title">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title}</div>
               <div class="task-meta">⏰ ${t.time || '12:00'} ${client ? '• 👤 ' + client.name : ''}</div>
               ${t.notes ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${t.notes}</div>` : ''}
             </div>
-            <div>
-              <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')" title="Добавить в Google Календарь">🌐 Google</button>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Edit</button>
+              <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
             </div>
           </div>
         `;
@@ -661,7 +680,6 @@
 
     function renderRecentClients() {
       const container = document.getElementById('recent-clients-list');
-      // Sort alphabetically for recent list
       const sorted = [...clients].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru', { sensitivity: 'base' }));
 
       container.innerHTML = sorted.slice(0, 5).map(c => `
@@ -686,7 +704,6 @@
         return true;
       });
 
-      // Sorting
       if (sortOrder === 'name_asc') {
         filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru', { sensitivity: 'base' }));
       } else if (sortOrder === 'name_desc') {
@@ -780,11 +797,12 @@
           <div class="task-item ${t.done ? 'done' : ''}">
             <input type="checkbox" class="task-checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
             <div style="flex:1;">
-              <div class="task-title">${t.title}</div>
+              <div class="task-title">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title}</div>
               <div class="task-meta">📅 ${t.date} в ${t.time || '12:00'} ${client ? '• 👤 ' + client.name : ''}</div>
               ${t.notes ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${t.notes}</div>` : ''}
             </div>
             <div style="display:flex; gap:4px; align-items:center;">
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️</button>
               <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
               <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToICal('${t.id}')">🍏 iCal</button>
               <button style="border:none; background:none; color:#dc2626; cursor:pointer; font-weight:bold; font-size:16px; margin-left:6px;" onclick="deleteTask('${t.id}')">&times;</button>
@@ -860,6 +878,12 @@
     }
 
     function openTaskModal(preselectClientId = '') {
+      document.getElementById('task-edit-id').value = '';
+      document.getElementById('task-modal-title').innerText = 'Запланировать задачу';
+      document.getElementById('task-type').value = 'viewing';
+      document.getElementById('task-title').value = '';
+      document.getElementById('task-notes').value = '';
+
       const select = document.getElementById('task-client-id');
       select.innerHTML = '<option value="">-- Выберите клиента --</option>' + 
         clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -873,6 +897,27 @@
       }
 
       document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+      closeModals();
+      document.getElementById('modal-task').classList.add('active');
+    }
+
+    function openEditTaskModal(taskId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      const select = document.getElementById('task-client-id');
+      select.innerHTML = '<option value="">-- Выберите клиента --</option>' + 
+        clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+      document.getElementById('task-edit-id').value = t.id;
+      document.getElementById('task-modal-title').innerText = 'Редактировать задачу';
+      document.getElementById('task-type').value = t.type || 'viewing';
+      document.getElementById('task-title').value = t.title || '';
+      document.getElementById('task-client-id').value = t.clientId || '';
+      document.getElementById('task-date').value = t.date || new Date().toISOString().split('T')[0];
+      document.getElementById('task-time').value = t.time || '12:00';
+      document.getElementById('task-notes').value = t.notes || '';
+
       closeModals();
       document.getElementById('modal-task').classList.add('active');
     }
@@ -925,16 +970,32 @@
 
     function saveTask(e) {
       e.preventDefault();
-      const newTask = {
-        id: 't-' + Date.now(),
-        title: document.getElementById('task-title').value,
-        clientId: document.getElementById('task-client-id').value,
-        date: document.getElementById('task-date').value,
-        time: document.getElementById('task-time').value,
-        notes: document.getElementById('task-notes').value,
-        done: false
-      };
-      tasks.unshift(newTask);
+      const editId = document.getElementById('task-edit-id').value;
+
+      if (editId) {
+        const idx = tasks.findIndex(x => x.id === editId);
+        if (idx !== -1) {
+          tasks[idx].title = document.getElementById('task-title').value;
+          tasks[idx].type = document.getElementById('task-type').value;
+          tasks[idx].clientId = document.getElementById('task-client-id').value;
+          tasks[idx].date = document.getElementById('task-date').value;
+          tasks[idx].time = document.getElementById('task-time').value;
+          tasks[idx].notes = document.getElementById('task-notes').value;
+        }
+      } else {
+        const newTask = {
+          id: 't-' + Date.now(),
+          title: document.getElementById('task-title').value,
+          type: document.getElementById('task-type').value,
+          clientId: document.getElementById('task-client-id').value,
+          date: document.getElementById('task-date').value,
+          time: document.getElementById('task-time').value,
+          notes: document.getElementById('task-notes').value,
+          done: false
+        };
+        tasks.unshift(newTask);
+      }
+
       closeModals();
       saveData();
     }
@@ -1055,11 +1116,12 @@
           ${clientTasks.map(t => `
             <div style="background:#fff; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:6px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <span style="font-weight:700;">${t.title}</span>
+                <span style="font-weight:700;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title}</span>
                 <div style="color:#64748b; font-size:11px;">📅 ${t.date} в ${t.time || '12:00'}</div>
               </div>
               <div style="display:flex; gap:4px; align-items:center;">
-                <button class="btn btn-secondary" style="font-size:10px; padding:2px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Edit</button>
+                <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
                 <span style="font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
               </div>
             </div>
