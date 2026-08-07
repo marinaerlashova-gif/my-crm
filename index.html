@@ -1008,7 +1008,7 @@
       document.getElementById('modal-import')?.classList.add('active');
     }
 
-    function openTaskModalFromClientForm() {
+    async function openTaskModalFromClientForm() {
       const nameVal = document.getElementById('client-name')?.value.trim();
       if (!nameVal) {
         alert('Пожалуйста, сначала укажите ФИО клиента');
@@ -1044,9 +1044,12 @@
           notes: document.getElementById('client-notes').value
         };
         clients.unshift(newClient);
+        if (newClient.notes) {
+          comments.unshift({ id: 'com-' + Date.now(), clientId: newClient.id, text: newClient.notes, date: new Date().toLocaleString('ru-RU') });
+        }
       }
 
-      saveDataLocally();
+      await saveData();
       openTaskModal(clientId);
     }
 
@@ -1137,6 +1140,10 @@
 
       closeModals();
       document.getElementById('modal-task')?.classList.add('active');
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
     }
 
     function saveClient(e) {
