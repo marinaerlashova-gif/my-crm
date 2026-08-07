@@ -869,19 +869,19 @@
         const purePhone = cleanPhone(c.phone);
         const st = c.status || 'lead';
         return `
-          <div class="client-card">
+          <div class="client-card" onclick="openDetailModal('${c.id}')" style="cursor: pointer;">
             <div class="client-header">
               <div style="display:flex; align-items:center; gap:6px;">
-                <div class="client-name" onclick="openDetailModal('${c.id}')">${c.name || 'Без имени'}</div>
+                <div class="client-name">${c.name || 'Без имени'}</div>
                 <span class="role-badge">${c.type === 'seller' ? 'Продавец' : 'Покупатель'}</span>
               </div>
               <span class="status-tag status-${st}">${STATUS_MAP[st] || st}</span>
             </div>
 
             <div class="client-contact-row">
-              <a href="tel:${purePhone}">📞 ${c.phone || 'Нет телефона'}</a>
+              <a href="tel:${purePhone}" onclick="event.stopPropagation()">📞 ${c.phone || 'Нет телефона'}</a>
               <div>
-                ${purePhone ? `<a href="https://wa.me/${purePhone}" target="_blank" class="social-btn wa-btn">WA</a> <a href="https://t.me/+${purePhone}" target="_blank" class="social-btn tg-btn">TG</a>` : ''}
+                ${purePhone ? `<a href="https://wa.me/${purePhone}" target="_blank" onclick="event.stopPropagation()" class="social-btn wa-btn">WA</a> <a href="https://t.me/+${purePhone}" target="_blank" onclick="event.stopPropagation()" class="social-btn tg-btn">TG</a>` : ''}
               </div>
             </div>
 
@@ -895,10 +895,10 @@
             ` : ''}
 
             <div class="card-footer">
-              <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки & Задачи</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); openDetailModal('${c.id}')">👁 Профиль & Задачи</button>
               <div style="display:flex; gap:4px;">
-                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="openEditClientModal('${c.id}')">✏️ Изменить</button>
-                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px; color:#dc2626;" onclick="deleteClient('${c.id}')">Удалить</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); openEditClientModal('${c.id}')">✏️ Изменить</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px; color:#dc2626;" onclick="event.stopPropagation(); deleteClient('${c.id}')">Удалить</button>
               </div>
             </div>
           </div>
@@ -1338,50 +1338,72 @@
       const modalBody = document.getElementById('detail-modal-body');
       if (!modalBody) return;
 
+      const statusKey = client.status || 'lead';
+      const roleText = client.type === 'seller' ? 'Продавец' : 'Покупатель';
+      const purePhone = cleanPhone(client.phone);
+
       modalBody.innerHTML = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:12px; margin-bottom:16px; font-size:13px;">
-          <div>📞 Телефон: <strong>${client.phone || 'Не указан'}</strong></div>
-          <div>💰 Общий бюджет: <strong style="color:#059669;">${client.budget || 'Не указан'}</strong></div>
-          ${client.initialPayment ? `<div>💳 Первоначальный взнос (ПВ): <strong>${client.initialPayment}</strong></div>` : ''}
-          ${client.monthlyPayment ? `<div>📅 Желаемый платеж: <strong>${client.monthlyPayment}</strong></div>` : ''}
-          <div>🏢 Запрос: <strong>${client.property || 'Не указан'}</strong></div>
-          <div style="margin-top:10px; display:flex; gap:8px;">
-            <button class="btn btn-secondary" style="font-size:11px; padding:4px 10px;" onclick="openEditClientModal('${client.id}')">✏️ Редактировать данные</button>
-            <button class="btn btn-primary" style="font-size:11px; padding:4px 10px;" onclick="openTaskModal('${client.id}')">📅 + Назначить задачу / показ</button>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:12px; margin-bottom:16px; font-size:13px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+            <div>
+              <span class="role-badge" style="margin-left:0; font-size:11px;">${roleText}</span>
+              <span class="status-tag status-${statusKey}" style="margin-left:6px;">${STATUS_MAP[statusKey] || statusKey}</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              ${purePhone ? `
+                <a href="https://wa.me/${purePhone}" target="_blank" class="social-btn wa-btn">WhatsApp</a>
+                <a href="https://t.me/+${purePhone}" target="_blank" class="social-btn tg-btn">Telegram</a>
+              ` : ''}
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div>📞 Телефон: <strong>${client.phone ? `<a href="tel:${purePhone}" style="text-decoration:none; color:#2563eb;">${client.phone}</a>` : 'Не указан'}</strong></div>
+            <div>💰 Бюджет: <strong style="color:#059669;">${client.budget || 'Не указан'}</strong></div>
+            ${client.initialPayment ? `<div>💳 Первоначальный взнос (ПВ): <strong>${client.initialPayment}</strong></div>` : ''}
+            ${client.monthlyPayment ? `<div>📅 Ежемесячный платеж: <strong>${client.monthlyPayment}</strong></div>` : ''}
+          </div>
+
+          ${client.property ? `<div style="margin-top:4px;">🏢 Запрос по недвижимости: <strong>${client.property}</strong></div>` : ''}
+          ${client.notes ? `<div style="margin-top:8px; background:#fff; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0; color:#475569;">📝 Примечания: ${client.notes}</div>` : ''}
+
+          <div style="margin-top:12px; display:flex; gap:8px; border-top:1px solid #e2e8f0; padding-top:10px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" style="font-size:11px; padding:5px 12px;" onclick="openEditClientModal('${client.id}')">✏️ Редактировать клиента</button>
+            <button class="btn btn-emerald" style="font-size:11px; padding:5px 12px;" onclick="openTaskModal('${client.id}')">📅 + Запланировать задачу</button>
           </div>
         </div>
 
-        <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">Задачи по клиенту (${clientTasks.length})</h4>
+        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px; color:#0f172a;">📅 Запланированные задачи (${clientTasks.length})</h4>
         <div style="margin-bottom:16px;">
           ${clientTasks.map(t => `
-            <div style="background:#fff; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:6px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:#fff; border:1px solid #e2e8f0; padding:10px 12px; border-radius:10px; margin-bottom:6px; font-size:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <div>
-                <span style="font-weight:700;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title || 'Задача'}</span>
-                <div style="color:#64748b; font-size:11px;">📅 ${t.date || ''} в ${t.time || '12:00'}</div>
+                <div style="font-weight:700; font-size:13px; color:#0f172a;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title || 'Задача'}</div>
+                <div style="color:#64748b; font-size:11px; margin-top:2px;">📅 ${t.date || ''} в ${t.time || '12:00'} ${t.notes ? '• ' + t.notes : ''}</div>
               </div>
               <div style="display:flex; gap:4px; align-items:center;">
-                <button class="btn btn-secondary" style="font-size:11px; padding:4px 10px;" onclick="openEditTaskModal('${t.id}')">✏️ Редактировать</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Редактировать</button>
                 <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
-                <span style="font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
+                <span style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
               </div>
             </div>
-          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic;">Задач по клиенту пока нет</div>'}
+          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic; padding:8px; background:#f8fafc; border-radius:8px; text-align:center;">Задач по этому клиенту пока нет</div>'}
         </div>
 
-        <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">Добавить заметку / результат показа</h4>
+        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px; color:#0f172a;">💬 Добавить заметку / результат взаимодействия</h4>
         <div style="display:flex; gap:8px; margin-bottom:16px;">
-          <input type="text" id="new-comment-input" class="form-control" placeholder="Напишите комментарий...">
+          <input type="text" id="new-comment-input" class="form-control" placeholder="Напишите комментарий или результат показа...">
           <button class="btn btn-primary" onclick="addComment('${client.id}')">Отправить</button>
         </div>
 
-        <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">История комментариев (${clientComments.length})</h4>
+        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px; color:#0f172a;">📜 История заметок (${clientComments.length})</h4>
         <div>
           ${clientComments.map(c => `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; margin-bottom:8px; font-size:12px;">
               <div style="color:#64748b; font-size:10px; margin-bottom:4px;">${c.date || ''}</div>
               <div style="color:#0f172a;">${c.text || ''}</div>
             </div>
-          `).join('') || '<div style="color:#94a3b8; font-size:12px;">Заметок пока нет</div>'}
+          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic; padding:8px; text-align:center;">Заметок пока нет</div>'}
         </div>
       `;
 
