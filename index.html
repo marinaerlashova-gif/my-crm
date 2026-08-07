@@ -85,6 +85,8 @@
     .status-viewing { background: #fef3c7; color: #92400e; }
     .status-negotiation { background: #ffedd5; color: #9a3412; }
     .status-deal { background: #d1fae5; color: #065f46; }
+    .status-no_answer { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .status-not_relevant { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
 
     .role-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #475569; margin-left: 6px; }
 
@@ -242,6 +244,8 @@
           <option value="viewing">Показы</option>
           <option value="negotiation">Переговоры</option>
           <option value="deal">Сделка</option>
+          <option value="no_answer">📵 Не отвечает</option>
+          <option value="not_relevant">❌ Не актуально</option>
         </select>
 
         <button class="btn btn-emerald" style="margin-left: auto;" onclick="openImportModal()">📱 Импорт контактов</button>
@@ -343,6 +347,8 @@
               <option value="viewing">Показы</option>
               <option value="negotiation">Переговоры / Задаток</option>
               <option value="deal">Сделка</option>
+              <option value="no_answer">📵 Не отвечает</option>
+              <option value="not_relevant">❌ Не актуально</option>
             </select>
           </div>
 
@@ -439,7 +445,9 @@
       in_progress: 'В работе',
       viewing: 'Показы',
       negotiation: 'Переговоры',
-      deal: 'Сделка'
+      deal: 'Сделка',
+      no_answer: '📵 Не отвечает',
+      not_relevant: '❌ Не актуально'
     };
 
     let clients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
@@ -516,7 +524,7 @@
 
     function renderStats() {
       document.getElementById('stat-clients-count').innerText = clients.length;
-      document.getElementById('stat-active-clients').innerText = clients.filter(c => c.status !== 'deal').length;
+      document.getElementById('stat-active-clients').innerText = clients.filter(c => c.status !== 'deal' && c.status !== 'not_relevant').length;
       document.getElementById('stat-deals-count').innerText = clients.filter(c => c.status === 'deal').length;
 
       const todayStr = new Date().toISOString().split('T')[0];
@@ -629,7 +637,9 @@
         { key: 'in_progress', title: 'В работе' },
         { key: 'viewing', title: 'Показы' },
         { key: 'negotiation', title: 'Переговоры' },
-        { key: 'deal', title: 'Сделка' }
+        { key: 'deal', title: 'Сделка' },
+        { key: 'no_answer', title: '📵 Не отвечает' },
+        { key: 'not_relevant', title: '❌ Не актуально' }
       ];
 
       container.innerHTML = stages.map(s => {
