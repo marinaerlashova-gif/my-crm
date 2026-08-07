@@ -157,6 +157,7 @@
       </nav>
 
       <div class="actions-area">
+        <div id="sync-badge" class="sync-status sync-online" onclick="loadCloudData()" style="cursor:pointer;" title="Нажмите для принудительного обновления">☁️ Вечное облако связано</div>
         <button class="btn btn-amber" onclick="enablePushNotifications()" title="Включить всплывающие напоминания на телефоне">🔔 Уведомления</button>
         <button class="btn btn-emerald" onclick="openImportModal()">📱 Импорт контактов</button>
         <button class="btn btn-secondary" onclick="openTaskModal()">+ Задача</button>
@@ -172,7 +173,7 @@
       <!-- Welcome Banner -->
       <div class="banner">
         <h1>Рабочий день риелтора</h1>
-        <p>Облачная синхронизация между ПК и телефоном, уведомления о показах, экспорт в Google/Apple Календарь.</p>
+        <p>Единая вечная облачная база данных между ПК и телефоном, авто-обновление каждые 8 секунд.</p>
         <div class="banner-btns">
           <button class="btn btn-amber" style="background:#f59e0b; color:#fff;" onclick="enablePushNotifications()">🔔 Включить уведомления на телефоне</button>
           <button class="btn btn-emerald" style="background:#10b981; color:#fff;" onclick="openImportModal()">📱 Импортировать контакты (.vcf)</button>
@@ -451,9 +452,10 @@
 
   <script>
     // State
-    const STORAGE_KEY_CLIENTS = 'realty_crm_clients_cloud_v2';
-    const STORAGE_KEY_TASKS = 'realty_crm_tasks_cloud_v2';
-    const STORAGE_KEY_COMMENTS = 'realty_crm_comments_cloud_v2';
+    const STORAGE_KEY_CLIENTS = 'realty_crm_clients_cloud_v3';
+    const STORAGE_KEY_TASKS = 'realty_crm_tasks_cloud_v3';
+    const STORAGE_KEY_COMMENTS = 'realty_crm_comments_cloud_v3';
+    const PERMANENT_CLOUD_URL = 'https://jsonblob.com/api/jsonBlob/019fdca9-7a28-723b-89bc-b5941283a8b4';
 
     const STATUS_MAP = {
       lead: 'Новый лид',
@@ -573,40 +575,59 @@
       URL.revokeObjectURL(url);
     }
 
-    // Cloud Data Sync
+    // Permanent Cloud Data Sync Engine
     async function loadCloudData() {
       const localClients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
       const localTasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
       const localComments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [];
 
+      let cloudData = null;
+
       try {
         const res = await fetch('/api/db');
         if (res.ok) {
-          const cloudData = await res.json();
-          const cloudClients = cloudData.clients || [];
-          const cloudTasks = cloudData.tasks || [];
-          const cloudComments = cloudData.comments || [];
-
-          if (cloudClients.length > 0) {
-            const clientMap = new Map();
-            [...cloudClients, ...localClients].forEach(c => clientMap.set(c.id, c));
-            clients = Array.from(clientMap.values());
-            tasks = cloudTasks.length ? cloudTasks : localTasks;
-            comments = cloudComments.length ? cloudComments : localComments;
-          } else if (localClients.length > 0) {
-            clients = localClients;
-            tasks = localTasks;
-            comments = localComments;
-            await pushLocalToCloud();
-          }
-
-          saveDataLocally();
-          render();
+          cloudData = await res.json();
         }
       } catch (err) {
-        console.log('Running in local/offline mode');
+        console.log('Server API offline, trying direct cloud DB...');
+      }
+
+      if (!cloudData || !cloudData.clients) {
+        try {
+          const directRes = await fetch(PERMANENT_CLOUD_URL, { headers: { 'Accept': 'application/json' } });
+          if (directRes.ok) {
+            cloudData = await directRes.json();
+          }
+        } catch (e) {
+          console.log('Direct cloud fetch error');
+        }
+      }
+
+      if (cloudData && cloudData.clients) {
+        const cloudClients = cloudData.clients || [];
+        const cloudTasks = cloudData.tasks || [];
+        const cloudComments = cloudData.comments || [];
+
+        if (cloudClients.length > 0) {
+          const clientMap = new Map();
+          [...cloudClients, ...localClients].forEach(c => clientMap.set(c.id, c));
+          clients = Array.from(clientMap.values());
+          tasks = cloudTasks.length ? cloudTasks : localTasks;
+          comments = cloudComments.length ? cloudComments : localComments;
+        } else if (localClients.length > 0) {
+          clients = localClients;
+          tasks = localTasks;
+          comments = localComments;
+          await pushLocalToCloud();
+        }
+
+        saveDataLocally();
+        render();
       }
     }
+
+    // Auto Refresh Cloud Data Every 8 Seconds (Realtime Sync)
+    setInterval(loadCloudData, 8000);
 
     function saveDataLocally() {
       localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
@@ -615,15 +636,25 @@
     }
 
     async function pushLocalToCloud() {
+      const payload = JSON.stringify({ clients, tasks, comments });
+
+      // Save to Render backend
       try {
         await fetch('/api/db', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clients, tasks, comments })
+          body: payload
         });
-      } catch (err) {
-        console.error('Cloud save error:', err);
-      }
+      } catch (err) {}
+
+      // Save to Direct Permanent Cloud DB
+      try {
+        await fetch(PERMANENT_CLOUD_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: payload
+        });
+      } catch (err) {}
     }
 
     async function saveData() {
@@ -1169,4 +1200,4 @@
   </script>
 </body>
 </html>
-,path:/home/user/render-app/index.html}
+,path:/home/user/RealtyCRM.html}
