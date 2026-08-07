@@ -96,6 +96,16 @@
 
     .role-badge { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 4px; background: #f1f5f9; color: #475569; }
 
+    .term-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; user-select: none; transition: all 0.15s; }
+    .term-chip.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+
+    .tag-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; cursor: pointer; }
+    .tag-badge:hover { background: #bae6fd; }
+
+    .urgency-hot { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; font-weight: 700; }
+    .urgency-warm { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 700; }
+    .urgency-cold { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
     .client-contact-row { font-size: 12px; color: #334155; margin: 4px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
     .client-contact-row a { text-decoration: none; color: inherit; font-weight: 600; }
     .client-contact-row a:hover { color: var(--primary); }
@@ -105,7 +115,7 @@
     .tg-btn { background: #e0f2fe; color: #0369a1; }
 
     .client-params-inline { font-size: 11px; color: #475569; display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px solid #f1f5f9; }
-    .param-pill { display: inline-flex; align-items: center; gap: 3px; }
+    .param-pill { display: inline-flex; align-items: center; gap: 3px; flex-wrap: wrap; }
     .param-pill strong { color: #0f172a; }
 
     .card-footer { margin-top: 6px; padding-top: 6px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 11px; gap: 6px; flex-wrap: wrap; }
@@ -231,15 +241,15 @@
     <!-- TAB 2: CLIENTS LIST -->
     <div id="tab-clients" class="tab-content" style="display:none;">
       <div class="card-box" style="padding: 14px; margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <input type="text" id="client-search" class="form-control" placeholder="🔍 Поиск по ФИО, телефону, бюджету..." style="max-width: 250px;" oninput="renderClients()">
+        <input type="text" id="client-search" class="form-control" placeholder="🔍 Поиск по ФИО, телефону, хэштегу #..." style="max-width: 240px;" oninput="renderClients()">
         
-        <select id="sort-order" class="form-control" style="max-width: 200px;" onchange="renderClients()">
+        <select id="sort-order" class="form-control" style="max-width: 180px;" onchange="renderClients()">
           <option value="name_asc">🔤 По алфавиту (А ➔ Я)</option>
           <option value="name_desc">🔤 По алфавиту (Я ➔ А)</option>
           <option value="newest">⏱ Сначала новые</option>
         </select>
 
-        <select id="status-filter" class="form-control" style="max-width: 160px;" onchange="renderClients()">
+        <select id="status-filter" class="form-control" style="max-width: 150px;" onchange="renderClients()">
           <option value="all">Все статусы</option>
           <option value="lead">Новый лид</option>
           <option value="in_progress">В работе</option>
@@ -249,6 +259,23 @@
           <option value="purchased">Уже купили</option>
           <option value="no_answer">📵 Не отвечает</option>
           <option value="not_relevant">❌ Не актуально</option>
+        </select>
+
+        <select id="payment-filter" class="form-control" style="max-width: 160px;" onchange="renderClients()">
+          <option value="all">Условия оплаты (все)</option>
+          <option value="Наличные">💵 Наличные</option>
+          <option value="Ипотека">🏦 Ипотека</option>
+          <option value="Маткапитал">👨‍👩‍👧 Маткапитал</option>
+          <option value="Субсидия">📜 Субсидия</option>
+          <option value="Рассрочка">⏳ Рассрочка</option>
+          <option value="Трейд-ин">🔄 Трейд-ин</option>
+        </select>
+
+        <select id="urgency-filter" class="form-control" style="max-width: 150px;" onchange="renderClients()">
+          <option value="all">Срочность (все)</option>
+          <option value="hot">🔥 Срочно</option>
+          <option value="warm">⚡ До месяца</option>
+          <option value="cold">🧊 На будущее</option>
         </select>
 
         <button class="btn btn-emerald" style="margin-left: auto;" onclick="openImportModal()">📱 Импорт контактов</button>
@@ -342,18 +369,44 @@
               <option value="landlord">Арендодатель</option>
             </select>
           </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label>Этап / Статус</label>
+              <select id="client-status" class="form-control">
+                <option value="lead">Новый лид</option>
+                <option value="in_progress">В работе</option>
+                <option value="viewing">Показы</option>
+                <option value="negotiation">Переговоры / Задаток</option>
+                <option value="deal">Сделка</option>
+                <option value="purchased">Уже купили</option>
+                <option value="no_answer">📵 Не отвечает</option>
+                <option value="not_relevant">❌ Не актуально</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Срочность / Приоритет</label>
+              <select id="client-urgency" class="form-control">
+                <option value="normal">⚪ Стандартный</option>
+                <option value="hot">🔥 Срочно (готов к сделке)</option>
+                <option value="warm">⚡ В течение месяца</option>
+                <option value="cold">🧊 На будущее</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Условия покупки / Способ оплаты -->
           <div class="form-group">
-            <label>Этап / Статус</label>
-            <select id="client-status" class="form-control">
-              <option value="lead">Новый лид</option>
-              <option value="in_progress">В работе</option>
-              <option value="viewing">Показы</option>
-              <option value="negotiation">Переговоры / Задаток</option>
-              <option value="deal">Сделка</option>
-              <option value="purchased">Уже купили</option>
-              <option value="no_answer">📵 Не отвечает</option>
-              <option value="not_relevant">❌ Не актуально</option>
-            </select>
+            <label>Условия покупки / Способ оплаты (выберите теги)</label>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;" id="payment-chips-container">
+              <span class="term-chip" onclick="togglePaymentChip('💵 Наличные', this)">💵 Наличные</span>
+              <span class="term-chip" onclick="togglePaymentChip('🏦 Ипотека', this)">🏦 Ипотека</span>
+              <span class="term-chip" onclick="togglePaymentChip('👨‍👩‍👧 Маткапитал', this)">👨‍👩‍👧 Маткапитал</span>
+              <span class="term-chip" onclick="togglePaymentChip('📜 Субсидия', this)">📜 Субсидия</span>
+              <span class="term-chip" onclick="togglePaymentChip('⏳ Рассрочка', this)">⏳ Рассрочка</span>
+              <span class="term-chip" onclick="togglePaymentChip('🔄 Трейд-ин', this)">🔄 Трейд-ин</span>
+            </div>
+            <input type="text" id="client-payment-terms" class="form-control" placeholder="Или добавьте свои теги/хэштеги: #сбербанк #семейная_ипотека #без_пв" oninput="syncPaymentChipsFromInput()">
           </div>
 
           <!-- Бюджет и Первоначальный взнос -->
@@ -518,6 +571,8 @@
           if (!existing.monthlyPayment && c.monthlyPayment) existing.monthlyPayment = c.monthlyPayment;
           if (!existing.property && c.property) existing.property = c.property;
           if (!existing.notes && c.notes) existing.notes = c.notes;
+          if (!existing.paymentTerms && c.paymentTerms) existing.paymentTerms = c.paymentTerms;
+          if (!existing.urgency && c.urgency) existing.urgency = c.urgency;
           if (c.status && c.status !== 'lead') existing.status = c.status;
         }
       });
@@ -838,17 +893,46 @@
       const container = document.getElementById('clients-container');
       if (!container) return;
       const search = (document.getElementById('client-search')?.value || '').toLowerCase().trim();
-      const filter = document.getElementById('status-filter')?.value || 'all';
+      const statusFilter = document.getElementById('status-filter')?.value || 'all';
+      const paymentFilter = document.getElementById('payment-filter')?.value || 'all';
+      const urgencyFilter = document.getElementById('urgency-filter')?.value || 'all';
       const sortOrder = document.getElementById('sort-order')?.value || 'name_asc';
 
       let filtered = (clients || []).filter(c => {
         if (!c) return false;
         const cStatus = c.status || 'lead';
-        if (filter !== 'all' && cStatus !== filter) return false;
+        if (statusFilter !== 'all' && cStatus !== statusFilter) return false;
+
+        // Payment Terms Filter
+        if (paymentFilter !== 'all') {
+          const termsStr = String(c.paymentTerms || '').toLowerCase();
+          if (!termsStr.includes(paymentFilter.toLowerCase())) return false;
+        }
+
+        // Urgency Filter
+        if (urgencyFilter !== 'all') {
+          const u = c.urgency || 'normal';
+          if (u !== urgencyFilter) return false;
+        }
+
+        // Search (Name, Phone, Budget, Property, Payment Terms, Notes)
         if (search) {
           const nameStr = String(c.name || '').toLowerCase();
-          const phoneStr = String(c.phone || '');
-          if (!nameStr.includes(search) && !phoneStr.includes(search)) return false;
+          const phoneStr = String(c.phone || '').toLowerCase();
+          const budgetStr = String(c.budget || '').toLowerCase();
+          const propStr = String(c.property || '').toLowerCase();
+          const termsStr = String(c.paymentTerms || '').toLowerCase();
+          const notesStr = String(c.notes || '').toLowerCase();
+
+          const combined = `${nameStr} ${phoneStr} ${budgetStr} ${propStr} ${termsStr} ${notesStr}`;
+
+          const searchWords = search.split(/\s+/).filter(Boolean);
+          const matchesAll = searchWords.every(word => {
+            const cleanWord = word.startsWith('#') ? word.substring(1) : word;
+            return combined.includes(cleanWord);
+          });
+
+          if (!matchesAll) return false;
         }
         return true;
       });
@@ -868,12 +952,19 @@
       container.innerHTML = filtered.map(c => {
         const purePhone = cleanPhone(c.phone);
         const st = c.status || 'lead';
+        const u = c.urgency || 'normal';
+
+        let urgencyBadge = '';
+        if (u === 'hot') urgencyBadge = '<span class="status-tag urgency-hot">🔥 Срочно</span>';
+        else if (u === 'warm') urgencyBadge = '<span class="status-tag urgency-warm">⚡ 1 мес.</span>';
+
         return `
           <div class="client-card" onclick="openDetailModal('${c.id}')" style="cursor: pointer;">
             <div class="client-header">
-              <div style="display:flex; align-items:center; gap:6px;">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                 <div class="client-name">${c.name || 'Без имени'}</div>
                 <span class="role-badge">${c.type === 'seller' ? 'Продавец' : 'Покупатель'}</span>
+                ${urgencyBadge}
               </div>
               <span class="status-tag status-${st}">${STATUS_MAP[st] || st}</span>
             </div>
@@ -885,11 +976,12 @@
               </div>
             </div>
 
-            ${(c.budget || c.initialPayment || c.monthlyPayment || c.property) ? `
+            ${(c.budget || c.initialPayment || c.monthlyPayment || c.paymentTerms || c.property) ? `
               <div class="client-params-inline">
                 ${c.budget ? `<span class="param-pill">💰 <strong>${c.budget}</strong></span>` : ''}
                 ${c.initialPayment ? `<span class="param-pill">💳 ПВ: <strong>${c.initialPayment}</strong></span>` : ''}
                 ${c.monthlyPayment ? `<span class="param-pill">📅 Платеж: <strong>${c.monthlyPayment}</strong></span>` : ''}
+                ${c.paymentTerms ? `<span class="param-pill" style="width:100%;">💳 <strong>Условия:</strong> ${c.paymentTerms.split(',').map(t => `<span class="tag-badge" onclick="event.stopPropagation(); setHashtagSearch('${t.trim()}')">${t.trim()}</span>`).join(' ')}</span>` : ''}
                 ${c.property ? `<span class="param-pill" style="width:100%;">🏢 <strong>${c.property}</strong></span>` : ''}
               </div>
             ` : ''}
@@ -1018,6 +1110,45 @@
       document.getElementById('modal-import')?.classList.add('active');
     }
 
+    function togglePaymentChip(term, element) {
+      element.classList.toggle('active');
+      const input = document.getElementById('client-payment-terms');
+      if (!input) return;
+      let currentTerms = input.value.split(',').map(s => s.trim()).filter(Boolean);
+      if (element.classList.contains('active')) {
+        if (!currentTerms.includes(term)) currentTerms.push(term);
+      } else {
+        currentTerms = currentTerms.filter(t => t !== term);
+      }
+      input.value = currentTerms.join(', ');
+    }
+
+    function syncPaymentChipsFromInput() {
+      const input = document.getElementById('client-payment-terms');
+      if (!input) return;
+      const currentVal = input.value.toLowerCase();
+      document.querySelectorAll('#payment-chips-container .term-chip').forEach(chip => {
+        const text = chip.innerText.trim().toLowerCase();
+        const cleanName = text.replace(/^[^\w\sа-яА-Я]+/, '').trim();
+        if (currentVal.includes(cleanName) || currentVal.includes(text)) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    }
+
+    function setHashtagSearch(tag) {
+      const searchInput = document.getElementById('client-search');
+      if (searchInput) {
+        const navBtns = document.querySelectorAll('.nav-btn');
+        if (navBtns[1]) switchTab('clients', navBtns[1]);
+        
+        searchInput.value = tag;
+        renderClients();
+      }
+    }
+
     async function openTaskModalFromClientForm() {
       const nameVal = document.getElementById('client-name')?.value.trim();
       if (!nameVal) {
@@ -1033,9 +1164,11 @@
           clients[idx].phone = document.getElementById('client-phone').value;
           clients[idx].type = document.getElementById('client-type').value;
           clients[idx].status = document.getElementById('client-status').value;
+          clients[idx].urgency = document.getElementById('client-urgency').value;
           clients[idx].budget = document.getElementById('client-budget').value;
           clients[idx].initialPayment = document.getElementById('client-initial-payment').value;
           clients[idx].monthlyPayment = document.getElementById('client-monthly-payment').value;
+          clients[idx].paymentTerms = document.getElementById('client-payment-terms').value;
           clients[idx].property = document.getElementById('client-property').value;
           clients[idx].notes = document.getElementById('client-notes').value;
         }
@@ -1047,9 +1180,11 @@
           phone: document.getElementById('client-phone').value,
           type: document.getElementById('client-type').value,
           status: document.getElementById('client-status').value,
+          urgency: document.getElementById('client-urgency').value,
           budget: document.getElementById('client-budget').value,
           initialPayment: document.getElementById('client-initial-payment').value,
           monthlyPayment: document.getElementById('client-monthly-payment').value,
+          paymentTerms: document.getElementById('client-payment-terms').value,
           property: document.getElementById('client-property').value,
           notes: document.getElementById('client-notes').value
         };
@@ -1071,11 +1206,14 @@
       document.getElementById('client-phone').value = '';
       document.getElementById('client-type').value = 'buyer';
       document.getElementById('client-status').value = 'lead';
+      document.getElementById('client-urgency').value = 'normal';
       document.getElementById('client-budget').value = '';
       document.getElementById('client-initial-payment').value = '';
       document.getElementById('client-monthly-payment').value = '';
+      document.getElementById('client-payment-terms').value = '';
       document.getElementById('client-property').value = '';
       document.getElementById('client-notes').value = '';
+      syncPaymentChipsFromInput();
       document.getElementById('modal-client').classList.add('active');
     }
 
@@ -1089,11 +1227,14 @@
       document.getElementById('client-phone').value = c.phone || '';
       document.getElementById('client-type').value = c.type || 'buyer';
       document.getElementById('client-status').value = c.status || 'lead';
+      document.getElementById('client-urgency').value = c.urgency || 'normal';
       document.getElementById('client-budget').value = c.budget || '';
       document.getElementById('client-initial-payment').value = c.initialPayment || '';
       document.getElementById('client-monthly-payment').value = c.monthlyPayment || '';
+      document.getElementById('client-payment-terms').value = c.paymentTerms || '';
       document.getElementById('client-property').value = c.property || '';
       document.getElementById('client-notes').value = c.notes || '';
+      syncPaymentChipsFromInput();
 
       closeModals();
       document.getElementById('modal-client')?.classList.add('active');
@@ -1167,9 +1308,11 @@
           clients[idx].phone = document.getElementById('client-phone').value;
           clients[idx].type = document.getElementById('client-type').value;
           clients[idx].status = document.getElementById('client-status').value;
+          clients[idx].urgency = document.getElementById('client-urgency')?.value || 'normal';
           clients[idx].budget = document.getElementById('client-budget').value;
           clients[idx].initialPayment = document.getElementById('client-initial-payment').value;
           clients[idx].monthlyPayment = document.getElementById('client-monthly-payment').value;
+          clients[idx].paymentTerms = document.getElementById('client-payment-terms')?.value || '';
           clients[idx].property = document.getElementById('client-property').value;
           clients[idx].notes = document.getElementById('client-notes').value;
         }
@@ -1180,9 +1323,11 @@
           phone: document.getElementById('client-phone').value,
           type: document.getElementById('client-type').value,
           status: document.getElementById('client-status').value,
+          urgency: document.getElementById('client-urgency')?.value || 'normal',
           budget: document.getElementById('client-budget').value,
           initialPayment: document.getElementById('client-initial-payment').value,
           monthlyPayment: document.getElementById('client-monthly-payment').value,
+          paymentTerms: document.getElementById('client-payment-terms')?.value || '',
           property: document.getElementById('client-property').value,
           notes: document.getElementById('client-notes').value
         };
@@ -1364,6 +1509,7 @@
             ${client.monthlyPayment ? `<div>📅 Ежемесячный платеж: <strong>${client.monthlyPayment}</strong></div>` : ''}
           </div>
 
+          ${client.paymentTerms ? `<div style="margin-top:4px;">💳 Условия покупки: ${client.paymentTerms.split(',').map(t => `<span class="tag-badge" onclick="closeModals(); setHashtagSearch('${t.trim()}')">${t.trim()}</span>`).join(' ')}</div>` : ''}
           ${client.property ? `<div style="margin-top:4px;">🏢 Запрос по недвижимости: <strong>${client.property}</strong></div>` : ''}
           ${client.notes ? `<div style="margin-top:8px; background:#fff; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0; color:#475569;">📝 Примечания: ${client.notes}</div>` : ''}
 
