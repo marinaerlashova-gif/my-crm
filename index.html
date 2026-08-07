@@ -73,15 +73,15 @@
     .card-box { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
     .box-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
 
-    /* Clients List & Cards - SINGLE COLUMN STACK (друг под другом) */
-    .clients-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    .client-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; transition: all 0.2s; position: relative; }
-    .client-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .client-name { font-weight: 700; font-size: 15px; color: #0f172a; cursor: pointer; }
+    /* Clients List & Cards - COMPACT SINGLE COLUMN STACK */
+    .clients-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .client-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; transition: all 0.2s; position: relative; }
+    .client-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .client-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .client-name { font-weight: 700; font-size: 14px; color: #0f172a; cursor: pointer; }
     .client-name:hover { color: var(--primary); }
 
-    .status-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; display: inline-block; }
+    .status-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; display: inline-block; whitespace: nowrap; }
     .status-lead { background: #dbeafe; color: #1e40af; }
     .status-in_progress { background: #f3e8ff; color: #6b21a8; }
     .status-viewing { background: #fef3c7; color: #92400e; }
@@ -91,20 +91,21 @@
     .status-no_answer { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     .status-not_relevant { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
 
-    .role-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #475569; margin-left: 6px; }
+    .role-badge { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 4px; background: #f1f5f9; color: #475569; }
 
-    .client-contact { font-size: 13px; color: #334155; margin: 8px 0; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 6px 0; }
-    .client-contact a { text-decoration: none; color: inherit; font-weight: 600; }
-    .client-contact a:hover { color: var(--primary); }
+    .client-contact-row { font-size: 12px; color: #334155; margin: 4px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+    .client-contact-row a { text-decoration: none; color: inherit; font-weight: 600; }
+    .client-contact-row a:hover { color: var(--primary); }
 
-    .social-btn { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-decoration: none; }
+    .social-btn { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-decoration: none; }
     .wa-btn { background: #dcfce7; color: #15803d; }
     .tg-btn { background: #e0f2fe; color: #0369a1; }
 
-    .client-info-item { font-size: 12px; color: #64748b; margin-top: 4px; }
-    .client-info-item strong { color: #0f172a; }
+    .client-params-inline { font-size: 11px; color: #475569; display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px solid #f1f5f9; }
+    .param-pill { display: inline-flex; align-items: center; gap: 3px; }
+    .param-pill strong { color: #0f172a; }
 
-    .card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 6px; flex-wrap: wrap; }
+    .card-footer { margin-top: 6px; padding-top: 6px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 11px; gap: 6px; flex-wrap: wrap; }
 
     /* Task Item */
     .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; background: #fff; flex-wrap: wrap; }
@@ -867,29 +868,35 @@
         return `
           <div class="client-card">
             <div class="client-header">
-              <div>
+              <div style="display:flex; align-items:center; gap:6px;">
                 <div class="client-name" onclick="openDetailModal('${c.id}')">${c.name || 'Без имени'}</div>
                 <span class="role-badge">${c.type === 'seller' ? 'Продавец' : 'Покупатель'}</span>
               </div>
               <span class="status-tag status-${st}">${STATUS_MAP[st] || st}</span>
             </div>
 
-            <div class="client-contact">
+            <div class="client-contact-row">
               <a href="tel:${purePhone}">📞 ${c.phone || 'Нет телефона'}</a>
               <div>
                 ${purePhone ? `<a href="https://wa.me/${purePhone}" target="_blank" class="social-btn wa-btn">WA</a> <a href="https://t.me/+${purePhone}" target="_blank" class="social-btn tg-btn">TG</a>` : ''}
               </div>
             </div>
 
-            ${c.budget ? `<div class="client-info-item">💰 Бюджет: <strong>${c.budget}</strong></div>` : ''}
-            ${c.initialPayment ? `<div class="client-info-item">💳 Первоначальный взнос (ПВ): <strong>${c.initialPayment}</strong></div>` : ''}
-            ${c.monthlyPayment ? `<div class="client-info-item">📅 Желаемый платеж: <strong>${c.monthlyPayment}</strong></div>` : ''}
-            ${c.property ? `<div class="client-info-item">🏢 Запрос: <strong>${c.property}</strong></div>` : ''}
+            ${(c.budget || c.initialPayment || c.monthlyPayment || c.property) ? `
+              <div class="client-params-inline">
+                ${c.budget ? `<span class="param-pill">💰 <strong>${c.budget}</strong></span>` : ''}
+                ${c.initialPayment ? `<span class="param-pill">💳 ПВ: <strong>${c.initialPayment}</strong></span>` : ''}
+                ${c.monthlyPayment ? `<span class="param-pill">📅 Платеж: <strong>${c.monthlyPayment}</strong></span>` : ''}
+                ${c.property ? `<span class="param-pill" style="width:100%;">🏢 <strong>${c.property}</strong></span>` : ''}
+              </div>
+            ` : ''}
 
             <div class="card-footer">
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки & Задачи</button>
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditClientModal('${c.id}')">✏️ Редактировать</button>
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px; color:#dc2626;" onclick="deleteClient('${c.id}')">Удалить</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки & Задачи</button>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="openEditClientModal('${c.id}')">✏️ Изменить</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px; color:#dc2626;" onclick="deleteClient('${c.id}')">Удалить</button>
+              </div>
             </div>
           </div>
         `;
