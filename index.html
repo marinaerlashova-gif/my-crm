@@ -456,7 +456,8 @@
       'realty_crm_clients_v3',
       'realty_crm_clients_cloud',
       'realty_crm_clients_cloud_v2',
-      'realty_crm_clients_cloud_v3'
+      'realty_crm_clients_cloud_v3',
+      'realty_crm_clients_master'
     ];
 
     const PERMANENT_CLOUD_URL = 'https://jsonblob.com/api/jsonBlob/019fdca9-7a28-723b-89bc-b5941283a8b4';
@@ -479,20 +480,51 @@
       other: '📌 Задача'
     };
 
-    // Helper: Collect all clients from ALL local storage keys to prevent ANY data loss!
+    // Smart Deduplication Engine: merges and deduplicates clients by phone/name
+    function deduplicateClientsList(list) {
+      const uniqueMap = new Map();
+
+      list.forEach(c => {
+        if (!c || !c.name) return;
+
+        const cleanP = (c.phone || '').replace(/\D/g, '');
+        const cleanN = (c.name || '').trim().toLowerCase();
+
+        // Unique Key: clean phone if phone >= 7 digits, otherwise clean name
+        const key = cleanP.length >= 7 ? 'p_' + cleanP : 'n_' + cleanN;
+
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, { ...c });
+        } else {
+          // Merge non-empty fields into existing entry
+          const existing = uniqueMap.get(key);
+          if (!existing.phone && c.phone) existing.phone = c.phone;
+          if (!existing.budget && c.budget) existing.budget = c.budget;
+          if (!existing.initialPayment && c.initialPayment) existing.initialPayment = c.initialPayment;
+          if (!existing.monthlyPayment && c.monthlyPayment) existing.monthlyPayment = c.monthlyPayment;
+          if (!existing.property && c.property) existing.property = c.property;
+          if (!existing.notes && c.notes) existing.notes = c.notes;
+          if (c.status && c.status !== 'lead') existing.status = c.status;
+        }
+      });
+
+      return Array.from(uniqueMap.values());
+    }
+
+    // Helper: Collect all clients from ALL local storage keys
     function getAllLocalClients() {
-      const map = new Map();
+      const allClients = [];
       STORAGE_KEYS.forEach(key => {
         try {
           const arr = JSON.parse(localStorage.getItem(key));
           if (Array.isArray(arr)) {
             arr.forEach(c => {
-              if (c && c.id && c.name) map.set(c.id, c);
+              if (c && c.name) allClients.push(c);
             });
           }
         } catch(e) {}
       });
-      return Array.from(map.values());
+      return deduplicateClientsList(allClients);
     }
 
     let clients = getAllLocalClients();
@@ -617,26 +649,21 @@
         const cloudTasks = cloudData.tasks || [];
         const cloudComments = cloudData.comments || [];
 
-        // MERGE ALL LOCAL + CLOUD CLIENTS
-        const clientMap = new Map();
-        [...cloudClients, ...localClients].forEach(c => {
-          if (c && c.id) clientMap.set(c.id, c);
-        });
-        
-        clients = Array.from(clientMap.values());
+        // MERGE ALL LOCAL + CLOUD CLIENTS & DEDUPLICATE
+        const rawCombined = [...cloudClients, ...localClients];
+        clients = deduplicateClientsList(rawCombined);
+
         if (cloudTasks.length) tasks = cloudTasks;
         if (cloudComments.length) comments = cloudComments;
 
         saveDataLocally();
         
-        // Push merged database back up to cloud so it permanently holds all contacts!
-        if (clients.length > cloudClients.length) {
-          await pushLocalToCloud();
-        }
+        // Push deduplicated database back up to cloud
+        await pushLocalToCloud();
         
         render();
       } else if (localClients.length > 0) {
-        clients = localClients;
+        clients = deduplicateClientsList(localClients);
         saveDataLocally();
         await pushLocalToCloud();
         render();
@@ -677,6 +704,7 @@
     }
 
     async function saveData() {
+      clients = deduplicateClientsList(clients);
       saveDataLocally();
       await pushLocalToCloud();
       render();
@@ -1219,4 +1247,3 @@
   </script>
 </body>
 </html>
-,path:/home/user/render-app/index.html}
