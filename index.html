@@ -43,6 +43,8 @@
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-emerald { background: #10b981; color: #ffffff; }
     .btn-emerald:hover { background: #059669; }
+    .btn-amber { background: #f59e0b; color: #ffffff; }
+    .btn-amber:hover { background: #d97706; }
     .btn-purple { background: #8b5cf6; color: #ffffff; }
     .btn-purple:hover { background: #7c3aed; }
     .btn-secondary { background: #f1f5f9; color: #334155; }
@@ -104,7 +106,7 @@
     .card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 6px; flex-wrap: wrap; }
 
     /* Task Item */
-    .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; background: #fff; }
+    .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; background: #fff; flex-wrap: wrap; }
     .task-item.done { opacity: 0.6; background: #f8fafc; }
     .task-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
     .task-title { font-size: 13px; font-weight: 600; }
@@ -155,7 +157,7 @@
       </nav>
 
       <div class="actions-area">
-        <div id="sync-badge" class="sync-status sync-online">☁️ Авто-Синхронизация</div>
+        <button class="btn btn-amber" onclick="enablePushNotifications()" title="Включить всплывающие напоминания на телефоне">🔔 Уведомления</button>
         <button class="btn btn-emerald" onclick="openImportModal()">📱 Импорт контактов</button>
         <button class="btn btn-secondary" onclick="openTaskModal()">+ Задача</button>
         <button class="btn btn-primary" onclick="openClientModal()">+ Клиент</button>
@@ -170,11 +172,11 @@
       <!-- Welcome Banner -->
       <div class="banner">
         <h1>Рабочий день риелтора</h1>
-        <p>Облачная синхронизация между ПК и телефоном, импорт контактов, подборки объектов и показы.</p>
+        <p>Облачная синхронизация между ПК и телефоном, уведомления о показах, экспорт в Google/Apple Календарь.</p>
         <div class="banner-btns">
-          <button class="btn btn-emerald" style="background:#10b981; color:#fff;" onclick="openImportModal()">📱 Импортировать телефонную книгу (.vcf)</button>
-          <button class="btn btn-primary" style="background:#fff; color:#1e3a8a;" onclick="openClientModal()">+ Добавить нового клиента</button>
-          <button class="btn btn-secondary" style="background:rgba(255,255,255,0.2); color:#fff;" onclick="openTaskModal()">📅 Запланировать показ</button>
+          <button class="btn btn-amber" style="background:#f59e0b; color:#fff;" onclick="enablePushNotifications()">🔔 Включить уведомления на телефоне</button>
+          <button class="btn btn-emerald" style="background:#10b981; color:#fff;" onclick="openImportModal()">📱 Импортировать контакты (.vcf)</button>
+          <button class="btn btn-primary" style="background:#fff; color:#1e3a8a;" onclick="openClientModal()">+ Добавить клиента</button>
         </div>
       </div>
 
@@ -454,6 +456,103 @@
     let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
     let comments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [];
 
+    // Notifications & Alarm Engine
+    function enablePushNotifications() {
+      if (!("Notification" in window)) {
+        alert("Ваш браузер не поддерживает всплывающие уведомления.");
+        return;
+      }
+
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          alert("🔔 Уведомления включены! Приложение будет напоминать вам о показах и встречах.");
+          new Notification("RealtyCRM Pro", {
+            body: "Уведомления успешно подключены! Мы напомним вам о ближайших показах.",
+            icon: "🏢"
+          });
+        } else {
+          alert("Уведомления отключены в настройках браузера. Разрешите уведомления для этого сайта в настройках телефона.");
+        }
+      });
+    }
+
+    function checkUpcomingTaskAlarms() {
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const nowTimeMin = now.getHours() * 60 + now.getMinutes();
+
+      tasks.forEach(t => {
+        if (t.done || t.date !== todayStr || !t.time) return;
+
+        const [h, m] = t.time.split(':').map(Number);
+        const taskTimeMin = h * 60 + m;
+        const diff = taskTimeMin - nowTimeMin;
+
+        // Alarm if task is in 15 minutes
+        if (diff === 15 && !t.notified) {
+          t.notified = true;
+          new Notification("⏰ Напоминание о показе!", {
+            body: `${t.title} через 15 минут в ${t.time}!`,
+            icon: "🏢"
+          });
+        }
+      });
+    }
+
+    setInterval(checkUpcomingTaskAlarms, 60000);
+
+    // Export Task to Google Calendar / iCal
+    function exportTaskToGoogleCalendar(taskId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      const dateClean = t.date.replace(/-/g, '');
+      const timeClean = (t.time || '12:00').replace(':', '') + '00';
+      const startIso = `${dateClean}T${timeClean}`;
+      
+      const [h, m] = (t.time || '12:00').split(':').map(Number);
+      const endH = String((h + 1) % 24).padStart(2, '0');
+      const endIso = `${dateClean}T${endH}${String(m).padStart(2, '0')}00`;
+
+      const title = encodeURIComponent(t.title);
+      const details = encodeURIComponent(t.notes || 'Показ недвижимости RealtyCRM');
+
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}`;
+      window.open(url, '_blank');
+    }
+
+    function exportTaskToICal(taskId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      const dateClean = t.date.replace(/-/g, '');
+      const timeClean = (t.time || '12:00').replace(':', '') + '00';
+      const startIso = `${dateClean}T${timeClean}Z`;
+
+      const icalContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//RealtyCRM Pro//RU',
+        'BEGIN:VEVENT',
+        `SUMMARY:${t.title}`,
+        `DESCRIPTION:${t.notes || 'Показ недвижимости'}`,
+        `DTSTART:${startIso}`,
+        `DTEND:${startIso}`,
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+
+      const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `event_${t.date}.ics`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     // Cloud Data Sync with Smart Merge & Local Backup
     async function loadCloudData() {
       const localClients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
@@ -551,6 +650,9 @@
               <div class="task-title">${t.title}</div>
               <div class="task-meta">⏰ ${t.time || '12:00'} ${client ? '• 👤 ' + client.name : ''}</div>
               ${t.notes ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${t.notes}</div>` : ''}
+            </div>
+            <div>
+              <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')" title="Добавить в Google Календарь">🌐 Google</button>
             </div>
           </div>
         `;
@@ -682,7 +784,11 @@
               <div class="task-meta">📅 ${t.date} в ${t.time || '12:00'} ${client ? '• 👤 ' + client.name : ''}</div>
               ${t.notes ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${t.notes}</div>` : ''}
             </div>
-            <button style="border:none; background:none; color:#dc2626; cursor:pointer; font-weight:bold;" onclick="deleteTask('${t.id}')">&times;</button>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
+              <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToICal('${t.id}')">🍏 iCal</button>
+              <button style="border:none; background:none; color:#dc2626; cursor:pointer; font-weight:bold; font-size:16px; margin-left:6px;" onclick="deleteTask('${t.id}')">&times;</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -952,7 +1058,10 @@
                 <span style="font-weight:700;">${t.title}</span>
                 <div style="color:#64748b; font-size:11px;">📅 ${t.date} в ${t.time || '12:00'}</div>
               </div>
-              <span style="font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
+              <div style="display:flex; gap:4px; align-items:center;">
+                <button class="btn btn-secondary" style="font-size:10px; padding:2px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
+                <span style="font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
+              </div>
             </div>
           `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic;">Задач по клиенту пока нет</div>'}
         </div>
