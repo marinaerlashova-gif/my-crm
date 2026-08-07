@@ -73,8 +73,11 @@
     .card-box { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
     .box-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
 
-    /* Clients List & Cards - COMPACT SINGLE COLUMN STACK */
-    .clients-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    /* Clients List & Cards - RESPONSIVE GRID (2 columns on desktop, 1 column on mobile) */
+    .clients-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (max-width: 768px) {
+      .clients-grid { grid-template-columns: 1fr; gap: 8px; }
+    }
     .client-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; transition: all 0.2s; position: relative; }
     .client-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .client-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
@@ -253,7 +256,7 @@
       </div>
 
       <div class="clients-grid" id="clients-container">
-        <!-- Client cards rendered here in single column stack -->
+        <!-- Client cards rendered here -->
       </div>
     </div>
 
