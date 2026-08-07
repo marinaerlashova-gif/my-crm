@@ -450,10 +450,15 @@
   </div>
 
   <script>
-    // State
-    const STORAGE_KEY_CLIENTS = 'realty_crm_clients_cloud_v3';
-    const STORAGE_KEY_TASKS = 'realty_crm_tasks_cloud_v3';
-    const STORAGE_KEY_COMMENTS = 'realty_crm_comments_cloud_v3';
+    // Storage Keys
+    const STORAGE_KEYS = [
+      'realty_crm_clients_v2',
+      'realty_crm_clients_v3',
+      'realty_crm_clients_cloud',
+      'realty_crm_clients_cloud_v2',
+      'realty_crm_clients_cloud_v3'
+    ];
+
     const PERMANENT_CLOUD_URL = 'https://jsonblob.com/api/jsonBlob/019fdca9-7a28-723b-89bc-b5941283a8b4';
 
     const STATUS_MAP = {
@@ -474,9 +479,25 @@
       other: '📌 Задача'
     };
 
-    let clients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
-    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
-    let comments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [];
+    // Helper: Collect all clients from ALL local storage keys to prevent ANY data loss!
+    function getAllLocalClients() {
+      const map = new Map();
+      STORAGE_KEYS.forEach(key => {
+        try {
+          const arr = JSON.parse(localStorage.getItem(key));
+          if (Array.isArray(arr)) {
+            arr.forEach(c => {
+              if (c && c.id && c.name) map.set(c.id, c);
+            });
+          }
+        } catch(e) {}
+      });
+      return Array.from(map.values());
+    }
+
+    let clients = getAllLocalClients();
+    let tasks = JSON.parse(localStorage.getItem('realty_crm_tasks_cloud_v2')) || [];
+    let comments = JSON.parse(localStorage.getItem('realty_crm_comments_cloud_v2')) || [];
 
     // Notifications & Alarm Engine
     function enablePushNotifications() {
@@ -574,32 +595,21 @@
       URL.revokeObjectURL(url);
     }
 
-    // Permanent Cloud Data Sync Engine
+    // Permanent Cloud Data Sync with Universal Recovery
     async function loadCloudData() {
-      const localClients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
-      const localTasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
-      const localComments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [];
-
+      const localClients = getAllLocalClients();
       let cloudData = null;
 
       try {
         const res = await fetch('/api/db');
-        if (res.ok) {
-          cloudData = await res.json();
-        }
-      } catch (err) {
-        console.log('Server API offline, trying direct cloud DB...');
-      }
+        if (res.ok) cloudData = await res.json();
+      } catch (err) {}
 
       if (!cloudData || !cloudData.clients) {
         try {
           const directRes = await fetch(PERMANENT_CLOUD_URL, { headers: { 'Accept': 'application/json' } });
-          if (directRes.ok) {
-            cloudData = await directRes.json();
-          }
-        } catch (e) {
-          console.log('Direct cloud fetch error');
-        }
+          if (directRes.ok) cloudData = await directRes.json();
+        } catch (e) {}
       }
 
       if (cloudData && cloudData.clients) {
@@ -607,31 +617,41 @@
         const cloudTasks = cloudData.tasks || [];
         const cloudComments = cloudData.comments || [];
 
-        if (cloudClients.length > 0) {
-          const clientMap = new Map();
-          [...cloudClients, ...localClients].forEach(c => clientMap.set(c.id, c));
-          clients = Array.from(clientMap.values());
-          tasks = cloudTasks.length ? cloudTasks : localTasks;
-          comments = cloudComments.length ? cloudComments : localComments;
-        } else if (localClients.length > 0) {
-          clients = localClients;
-          tasks = localTasks;
-          comments = localComments;
-          await pushLocalToCloud();
-        }
+        // MERGE ALL LOCAL + CLOUD CLIENTS
+        const clientMap = new Map();
+        [...cloudClients, ...localClients].forEach(c => {
+          if (c && c.id) clientMap.set(c.id, c);
+        });
+        
+        clients = Array.from(clientMap.values());
+        if (cloudTasks.length) tasks = cloudTasks;
+        if (cloudComments.length) comments = cloudComments;
 
         saveDataLocally();
+        
+        // Push merged database back up to cloud so it permanently holds all contacts!
+        if (clients.length > cloudClients.length) {
+          await pushLocalToCloud();
+        }
+        
+        render();
+      } else if (localClients.length > 0) {
+        clients = localClients;
+        saveDataLocally();
+        await pushLocalToCloud();
         render();
       }
     }
 
-    // Auto Refresh Cloud Data Every 8 Seconds (Realtime Sync)
+    // Auto Refresh Cloud Data Every 8 Seconds
     setInterval(loadCloudData, 8000);
 
     function saveDataLocally() {
-      localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
-      localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
-      localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(comments));
+      STORAGE_KEYS.forEach(key => {
+        localStorage.setItem(key, JSON.stringify(clients));
+      });
+      localStorage.setItem('realty_crm_tasks_cloud_v2', JSON.stringify(tasks));
+      localStorage.setItem('realty_crm_comments_cloud_v2', JSON.stringify(comments));
     }
 
     async function pushLocalToCloud() {
@@ -1199,3 +1219,4 @@
   </script>
 </body>
 </html>
+,path:/home/user/render-app/index.html}
