@@ -99,7 +99,7 @@
     .client-info-item { font-size: 12px; color: #64748b; margin-top: 4px; }
     .client-info-item strong { color: #0f172a; }
 
-    .card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+    .card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 6px; }
 
     /* Task Item */
     .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; background: #fff; }
@@ -299,15 +299,17 @@
     </div>
   </div>
 
-  <!-- MODAL: ADD CLIENT -->
+  <!-- MODAL: ADD / EDIT CLIENT -->
   <div class="modal-overlay" id="modal-client">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Добавить нового клиента</h3>
+        <h3 id="client-modal-title">Добавить нового клиента</h3>
         <button class="modal-close" onclick="closeModals()">&times;</button>
       </div>
       <div class="modal-body">
         <form onsubmit="saveClient(event)">
+          <input type="hidden" id="client-edit-id" value="">
+          
           <div class="form-group">
             <label>ФИО Клиента *</label>
             <input type="text" id="client-name" class="form-control" required placeholder="Иванов Иван Иванович">
@@ -340,14 +342,14 @@
             <input type="text" id="client-budget" class="form-control" placeholder="12 500 000 ₽">
           </div>
           <div class="form-group">
-            <label>Искомая недвижимость / Районы</label>
+            <label>Запрос по недвижимости / Районы</label>
             <input type="text" id="client-property" class="form-control" placeholder="2-к квартира, Приморский р-н">
           </div>
           <div class="form-group">
-            <label>Первичный комментарий / Требования</label>
+            <label>Дополнительные примечания / Требования</label>
             <textarea id="client-notes" class="form-control" rows="3" placeholder="Созвонились, рассматривают ипотеку от Сбербанка..."></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Сохранить клиента</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">💾 Сохранить изменения</button>
         </form>
       </div>
     </div>
@@ -417,18 +419,9 @@
       deal: 'Сделка'
     };
 
-    let clients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [
-      { id: '1', name: 'Иванова Анна Сергеевна', phone: '+7 (911) 234-56-78', type: 'buyer', status: 'viewing', budget: '14 500 000 ₽', property: '2-к квартира, Приморский р-н', notes: 'Ищет евро-двушку от 2018 г.' },
-      { id: '2', name: 'Петров Дмитрий Вадимович', phone: '+7 (921) 987-65-43', type: 'seller', status: 'in_progress', budget: '22 000 000 ₽', property: '3-к квартира на Московском пр.', notes: 'Продает 3-к квартиру 88 кв.м.' }
-    ];
-
-    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [
-      { id: 't1', title: 'Показ квартиры Анна Ивановой', clientId: '1', date: new Date().toISOString().split('T')[0], time: '14:00', done: false, notes: 'Встреча у 3 подъезда' }
-    ];
-
-    let comments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [
-      { id: 'c1', clientId: '1', text: 'Провели созвон. Клиентка готова к просмотру в субботу.', date: '2026-08-05 14:20' }
-    ];
+    let clients = JSON.parse(localStorage.getItem(STORAGE_KEY_CLIENTS)) || [];
+    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS)) || [];
+    let comments = JSON.parse(localStorage.getItem(STORAGE_KEY_COMMENTS)) || [];
 
     // Cloud Data Sync with Node Backend on Render
     async function loadCloudData() {
@@ -436,9 +429,7 @@
         const res = await fetch('/api/db');
         if (res.ok) {
           const cloudData = await res.json();
-          if (cloudData.clients && cloudData.clients.length) {
-            clients = cloudData.clients;
-          }
+          if (cloudData.clients) clients = cloudData.clients;
           if (cloudData.tasks) tasks = cloudData.tasks;
           if (cloudData.comments) comments = cloudData.comments;
           render();
@@ -510,7 +501,7 @@
 
     function renderRecentClients() {
       const container = document.getElementById('recent-clients-list');
-      container.innerHTML = clients.slice(0, 4).map(c => `
+      container.innerHTML = clients.slice(0, 5).map(c => `
         <div style="padding:10px; border-bottom:1px solid #f1f5f9; cursor:pointer;" onclick="openDetailModal('${c.id}')">
           <div style="font-weight:700; font-size:13px; color:#0f172a;">${c.name}</div>
           <div style="font-size:11px; color:#64748b;">${c.phone} • <strong style="color:#059669;">${c.budget || ''}</strong></div>
@@ -559,7 +550,8 @@
             ${c.property ? `<div class="client-info-item">🏢 Запрос: <strong>${c.property}</strong></div>` : ''}
 
             <div class="card-footer">
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки & История</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openDetailModal('${c.id}')">👁 Заметки</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditClientModal('${c.id}')">✏️ Редактировать</button>
               <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px; color:#dc2626;" onclick="deleteClient('${c.id}')">Удалить</button>
             </div>
           </div>
@@ -647,6 +639,33 @@
     }
 
     function openClientModal() {
+      document.getElementById('client-edit-id').value = '';
+      document.getElementById('client-modal-title').innerText = 'Добавить нового клиента';
+      document.getElementById('client-name').value = '';
+      document.getElementById('client-phone').value = '';
+      document.getElementById('client-type').value = 'buyer';
+      document.getElementById('client-status').value = 'lead';
+      document.getElementById('client-budget').value = '';
+      document.getElementById('client-property').value = '';
+      document.getElementById('client-notes').value = '';
+      document.getElementById('modal-client').classList.add('active');
+    }
+
+    function openEditClientModal(clientId) {
+      const c = clients.find(x => x.id === clientId);
+      if (!c) return;
+
+      document.getElementById('client-edit-id').value = c.id;
+      document.getElementById('client-modal-title').innerText = 'Редактировать клиента';
+      document.getElementById('client-name').value = c.name || '';
+      document.getElementById('client-phone').value = c.phone || '';
+      document.getElementById('client-type').value = c.type || 'buyer';
+      document.getElementById('client-status').value = c.status || 'lead';
+      document.getElementById('client-budget').value = c.budget || '';
+      document.getElementById('client-property').value = c.property || '';
+      document.getElementById('client-notes').value = c.notes || '';
+
+      closeModals();
       document.getElementById('modal-client').classList.add('active');
     }
 
@@ -654,11 +673,21 @@
       document.getElementById('modal-import').classList.add('active');
     }
 
-    function openTaskModal() {
+    function openTaskModal(preselectClientId = '') {
       const select = document.getElementById('task-client-id');
       select.innerHTML = '<option value="">-- Выберите клиента --</option>' + 
         clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      
+      if (preselectClientId) {
+        select.value = preselectClientId;
+        const targetClient = clients.find(c => c.id === preselectClientId);
+        if (targetClient) {
+          document.getElementById('task-title').value = `Показ / Встреча с ${targetClient.name}`;
+        }
+      }
+
       document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+      closeModals();
       document.getElementById('modal-task').classList.add('active');
     }
 
@@ -668,20 +697,38 @@
 
     function saveClient(e) {
       e.preventDefault();
-      const newClient = {
-        id: 'cli-' + Date.now(),
-        name: document.getElementById('client-name').value,
-        phone: document.getElementById('client-phone').value,
-        type: document.getElementById('client-type').value,
-        status: document.getElementById('client-status').value,
-        budget: document.getElementById('client-budget').value,
-        property: document.getElementById('client-property').value,
-        notes: document.getElementById('client-notes').value
-      };
-      clients.unshift(newClient);
-      if (newClient.notes) {
-        comments.unshift({ id: 'com-' + Date.now(), clientId: newClient.id, text: newClient.notes, date: new Date().toLocaleString('ru-RU') });
+      const editId = document.getElementById('client-edit-id').value;
+
+      if (editId) {
+        // Update existing client
+        const idx = clients.findIndex(x => x.id === editId);
+        if (idx !== -1) {
+          clients[idx].name = document.getElementById('client-name').value;
+          clients[idx].phone = document.getElementById('client-phone').value;
+          clients[idx].type = document.getElementById('client-type').value;
+          clients[idx].status = document.getElementById('client-status').value;
+          clients[idx].budget = document.getElementById('client-budget').value;
+          clients[idx].property = document.getElementById('client-property').value;
+          clients[idx].notes = document.getElementById('client-notes').value;
+        }
+      } else {
+        // Create new client
+        const newClient = {
+          id: 'cli-' + Date.now(),
+          name: document.getElementById('client-name').value,
+          phone: document.getElementById('client-phone').value,
+          type: document.getElementById('client-type').value,
+          status: document.getElementById('client-status').value,
+          budget: document.getElementById('client-budget').value,
+          property: document.getElementById('client-property').value,
+          notes: document.getElementById('client-notes').value
+        };
+        clients.unshift(newClient);
+        if (newClient.notes) {
+          comments.unshift({ id: 'com-' + Date.now(), clientId: newClient.id, text: newClient.notes, date: new Date().toLocaleString('ru-RU') });
+        }
       }
+
       closeModals();
       saveData();
     }
@@ -794,12 +841,30 @@
 
       document.getElementById('detail-client-name').innerText = client.name;
       const clientComments = comments.filter(c => c.clientId === clientId);
+      const clientTasks = tasks.filter(t => t.clientId === clientId);
 
       document.getElementById('detail-modal-body').innerHTML = `
-        <div style="font-size:13px; margin-bottom:16px;">
-          <div>📞 Телефон: <strong>${client.phone}</strong></div>
-          <div>💰 Бюджет: <strong>${client.budget || 'Не указан'}</strong></div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:12px; margin-bottom:16px; font-size:13px;">
+          <div>📞 Телефон: <strong>${client.phone || 'Не указан'}</strong></div>
+          <div>💰 Бюджет: <strong style="color:#059669;">${client.budget || 'Не указан'}</strong></div>
           <div>🏢 Запрос: <strong>${client.property || 'Не указан'}</strong></div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="btn btn-secondary" style="font-size:11px; padding:4px 10px;" onclick="openEditClientModal('${client.id}')">✏️ Редактировать данные</button>
+            <button class="btn btn-primary" style="font-size:11px; padding:4px 10px;" onclick="openTaskModal('${client.id}')">📅 + Назначить задачу / показ</button>
+          </div>
+        </div>
+
+        <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">Задачи по клиенту (${clientTasks.length})</h4>
+        <div style="margin-bottom:16px;">
+          ${clientTasks.map(t => `
+            <div style="background:#fff; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:6px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-weight:700;">${t.title}</span>
+                <div style="color:#64748b; font-size:11px;">📅 ${t.date} в ${t.time || '12:00'}</div>
+              </div>
+              <span style="font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
+            </div>
+          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic;">Задач по клиенту пока нет</div>'}
         </div>
 
         <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">Добавить заметку / результат показа</h4>
