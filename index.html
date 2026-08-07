@@ -379,49 +379,9 @@
             <textarea id="client-notes" class="form-control" rows="2" placeholder="Созвонились, рассматривают ипотеку от Сбербанка..."></textarea>
           </div>
 
-          <!-- СЕКЦИЯ: СОЗДАНИЕ ЗАДАЧИ / ПОКАЗА ПРЯМО ЗДЕСЬ -->
-          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px; margin: 16px 0;">
-            <div style="font-size: 13px; font-weight: 700; color: #0369a1; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-              <span>📅 Запланировать задачу / показ сразу</span>
-              <span style="font-size: 10px; font-weight: normal; color: #0284c7;">(опционально)</span>
-            </div>
-
-            <div class="form-group">
-              <label>Тип события</label>
-              <select id="client-task-type" class="form-control">
-                <option value="viewing">🏢 Показ объекта</option>
-                <option value="call">📞 Звонок / Сообщение</option>
-                <option value="meeting">🤝 Встреча / Переговоры</option>
-                <option value="doc">📄 Подготовка документов</option>
-                <option value="other">📌 Другое</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Название задачи</label>
-              <input type="text" id="client-task-title" class="form-control" placeholder="Например: Показ квартиры на Комендантском">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <div class="form-group">
-                <label>Дата</label>
-                <input type="date" id="client-task-date" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>Время</label>
-                <input type="time" id="client-task-time" class="form-control" value="14:00">
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Заметки к задаче</label>
-              <input type="text" id="client-task-notes" class="form-control" placeholder="Ключи у консьержа">
-            </div>
-          </div>
-
           <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;">
-            <button type="submit" onclick="window.autoExportClientTask = false" class="btn btn-secondary" style="flex: 1; justify-content: center;">💾 Только сохранить</button>
-            <button type="submit" onclick="window.autoExportClientTask = true" class="btn btn-emerald" style="flex: 1; justify-content: center;">🌐 💾 Сохранить и в Календарь</button>
+            <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">💾 Сохранить клиента</button>
+            <button type="button" class="btn btn-emerald" style="flex: 1; justify-content: center;" onclick="openTaskModalFromClientForm()">📅 + Назначить задачу / показ</button>
           </div>
         </form>
       </div>
@@ -847,7 +807,7 @@
               ${t.notes ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${t.notes}</div>` : ''}
             </div>
             <div style="display:flex; gap:4px; align-items:center;">
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Edit</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Редактировать</button>
               <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
             </div>
           </div>
@@ -993,7 +953,7 @@
               ${t.notes ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${t.notes}</div>` : ''}
             </div>
             <div style="display:flex; gap:4px; align-items:center;">
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Edit</button>
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Редактировать</button>
               <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
               <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToICal('${t.id}')">📲 iCal</button>
               <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px; color:#dc2626;" onclick="deleteTask('${t.id}')">Удалить</button>
@@ -1048,12 +1008,46 @@
       document.getElementById('modal-import')?.classList.add('active');
     }
 
-    function resetClientTaskFields() {
-      if (document.getElementById('client-task-title')) document.getElementById('client-task-title').value = '';
-      if (document.getElementById('client-task-type')) document.getElementById('client-task-type').value = 'viewing';
-      if (document.getElementById('client-task-date')) document.getElementById('client-task-date').value = '';
-      if (document.getElementById('client-task-time')) document.getElementById('client-task-time').value = '14:00';
-      if (document.getElementById('client-task-notes')) document.getElementById('client-task-notes').value = '';
+    function openTaskModalFromClientForm() {
+      const nameVal = document.getElementById('client-name')?.value.trim();
+      if (!nameVal) {
+        alert('Пожалуйста, сначала укажите ФИО клиента');
+        return;
+      }
+
+      let clientId = document.getElementById('client-edit-id')?.value;
+      if (clientId) {
+        const idx = clients.findIndex(x => x.id === clientId);
+        if (idx !== -1) {
+          clients[idx].name = nameVal;
+          clients[idx].phone = document.getElementById('client-phone').value;
+          clients[idx].type = document.getElementById('client-type').value;
+          clients[idx].status = document.getElementById('client-status').value;
+          clients[idx].budget = document.getElementById('client-budget').value;
+          clients[idx].initialPayment = document.getElementById('client-initial-payment').value;
+          clients[idx].monthlyPayment = document.getElementById('client-monthly-payment').value;
+          clients[idx].property = document.getElementById('client-property').value;
+          clients[idx].notes = document.getElementById('client-notes').value;
+        }
+      } else {
+        clientId = 'cli-' + Date.now();
+        const newClient = {
+          id: clientId,
+          name: nameVal,
+          phone: document.getElementById('client-phone').value,
+          type: document.getElementById('client-type').value,
+          status: document.getElementById('client-status').value,
+          budget: document.getElementById('client-budget').value,
+          initialPayment: document.getElementById('client-initial-payment').value,
+          monthlyPayment: document.getElementById('client-monthly-payment').value,
+          property: document.getElementById('client-property').value,
+          notes: document.getElementById('client-notes').value
+        };
+        clients.unshift(newClient);
+      }
+
+      saveDataLocally();
+      openTaskModal(clientId);
     }
 
     function openClientModal() {
@@ -1069,7 +1063,6 @@
       document.getElementById('client-monthly-payment').value = '';
       document.getElementById('client-property').value = '';
       document.getElementById('client-notes').value = '';
-      resetClientTaskFields();
       document.getElementById('modal-client').classList.add('active');
     }
 
@@ -1088,30 +1081,41 @@
       document.getElementById('client-monthly-payment').value = c.monthlyPayment || '';
       document.getElementById('client-property').value = c.property || '';
       document.getElementById('client-notes').value = c.notes || '';
-      resetClientTaskFields();
 
       closeModals();
       document.getElementById('modal-client')?.classList.add('active');
     }
 
-    function openTaskModal(clientId = '') {
+    function populateTaskClientDropdown(preselectId = '') {
+      const select = document.getElementById('task-client-id');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- Выберите клиента --</option>' + (clients || []).map(c => `
+        <option value="${c.id}">${c.name || 'Без имени'} (${c.phone || ''})</option>
+      `).join('');
+      if (preselectId) {
+        select.value = preselectId;
+      }
+    }
+
+    function openTaskModal(preselectClientId = '') {
       if (!document.getElementById('modal-task')) return;
       document.getElementById('task-edit-id').value = '';
       document.getElementById('task-modal-title').innerText = 'Запланировать задачу / Показ';
       document.getElementById('task-title').value = '';
       document.getElementById('task-type').value = 'viewing';
       document.getElementById('task-notes').value = '';
-      
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('task-date').value = today;
-      document.getElementById('task-time').value = '14:00';
 
-      populateTaskClientDropdown();
-      if (clientId) {
-        document.getElementById('task-client-id').value = clientId;
-      } else {
-        document.getElementById('task-client-id').value = '';
+      populateTaskClientDropdown(preselectClientId);
+
+      if (preselectClientId) {
+        const targetClient = (clients || []).find(c => c && c.id === preselectClientId);
+        if (targetClient && targetClient.name) {
+          document.getElementById('task-title').value = `Показ / Встреча — ${targetClient.name}`;
+        }
       }
+
+      document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('task-time').value = '14:00';
 
       closeModals();
       document.getElementById('modal-task').classList.add('active');
@@ -1121,35 +1125,23 @@
       const t = (tasks || []).find(x => x && x.id === taskId);
       if (!t) return;
 
+      populateTaskClientDropdown(t.clientId || '');
+
       document.getElementById('task-edit-id').value = t.id;
-      document.getElementById('task-modal-title').innerText = 'Редактировать задачу';
-      document.getElementById('task-title').value = t.title || '';
+      document.getElementById('task-modal-title').innerText = '✏️ Редактировать задачу';
       document.getElementById('task-type').value = t.type || 'viewing';
-      document.getElementById('task-date').value = t.date || '';
+      document.getElementById('task-title').value = t.title || '';
+      document.getElementById('task-date').value = t.date || new Date().toISOString().split('T')[0];
       document.getElementById('task-time').value = t.time || '12:00';
       document.getElementById('task-notes').value = t.notes || '';
-
-      populateTaskClientDropdown();
-      document.getElementById('task-client-id').value = t.clientId || '';
 
       closeModals();
       document.getElementById('modal-task')?.classList.add('active');
     }
 
-    function populateTaskClientDropdown() {
-      const select = document.getElementById('task-client-id');
-      if (!select) return;
-      const currentVal = select.value;
-      select.innerHTML = '<option value="">-- Выберите клиента --</option>' + (clients || []).map(c => `
-        <option value="${c.id}">${c.name || 'Без имени'} (${c.phone || ''})</option>
-      `).join('');
-      select.value = currentVal;
-    }
-
     function saveClient(e) {
       e.preventDefault();
       const editId = document.getElementById('client-edit-id').value;
-      let targetClientId = editId;
 
       if (editId) {
         const idx = clients.findIndex(x => x.id === editId);
@@ -1165,9 +1157,8 @@
           clients[idx].notes = document.getElementById('client-notes').value;
         }
       } else {
-        targetClientId = 'cli-' + Date.now();
         const newClient = {
-          id: targetClientId,
+          id: 'cli-' + Date.now(),
           name: document.getElementById('client-name').value,
           phone: document.getElementById('client-phone').value,
           type: document.getElementById('client-type').value,
@@ -1184,33 +1175,8 @@
         }
       }
 
-      // Check if task fields inside client modal are filled
-      const taskTitle = document.getElementById('client-task-title')?.value.trim();
-      const taskDate = document.getElementById('client-task-date')?.value;
-      let createdTaskId = null;
-
-      if (taskTitle || taskDate) {
-        createdTaskId = 't-' + Date.now();
-        const newTask = {
-          id: createdTaskId,
-          title: taskTitle || 'Показ / Встреча',
-          type: document.getElementById('client-task-type')?.value || 'viewing',
-          clientId: targetClientId,
-          date: taskDate || new Date().toISOString().split('T')[0],
-          time: document.getElementById('client-task-time')?.value || '14:00',
-          notes: document.getElementById('client-task-notes')?.value || '',
-          done: false
-        };
-        tasks.unshift(newTask);
-      }
-
       closeModals();
       saveData();
-
-      if (window.autoExportClientTask && createdTaskId) {
-        exportTaskToGoogleCalendar(createdTaskId);
-      }
-      window.autoExportClientTask = false;
     }
 
     function saveTask(e) {
@@ -1377,7 +1343,7 @@
                 <div style="color:#64748b; font-size:11px;">📅 ${t.date || ''} в ${t.time || '12:00'}</div>
               </div>
               <div style="display:flex; gap:4px; align-items:center;">
-                <button class="btn btn-secondary" style="font-size:11px; padding:4px 10px;" onclick="openEditTaskModal('${t.id}')">✏️ Edit</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:4px 10px;" onclick="openEditTaskModal('${t.id}')">✏️ Редактировать</button>
                 <button class="btn btn-secondary" style="font-size:10px; padding:3px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
                 <span style="font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; ${t.done ? 'background:#d1fae5; color:#065f46;' : 'background:#fef3c7; color:#92400e;'}">${t.done ? 'Выполнено' : 'Запланировано'}</span>
               </div>
