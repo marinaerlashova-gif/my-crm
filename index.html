@@ -376,9 +376,53 @@
           </div>
           <div class="form-group">
             <label>Дополнительные примечания / Требования</label>
-            <textarea id="client-notes" class="form-control" rows="3" placeholder="Созвонились, рассматривают ипотеку от Сбербанка..."></textarea>
+            <textarea id="client-notes" class="form-control" rows="2" placeholder="Созвонились, рассматривают ипотеку от Сбербанка..."></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">💾 Сохранить изменения</button>
+
+          <!-- СЕКЦИЯ: СОЗДАНИЕ ЗАДАЧИ / ПОКАЗА ПРЯМО ЗДЕСЬ -->
+          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px; margin: 16px 0;">
+            <div style="font-size: 13px; font-weight: 700; color: #0369a1; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+              <span>📅 Запланировать задачу / показ сразу</span>
+              <span style="font-size: 10px; font-weight: normal; color: #0284c7;">(опционально)</span>
+            </div>
+
+            <div class="form-group">
+              <label>Тип события</label>
+              <select id="client-task-type" class="form-control">
+                <option value="viewing">🏢 Показ объекта</option>
+                <option value="call">📞 Звонок / Сообщение</option>
+                <option value="meeting">🤝 Встреча / Переговоры</option>
+                <option value="doc">📄 Подготовка документов</option>
+                <option value="other">📌 Другое</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Название задачи</label>
+              <input type="text" id="client-task-title" class="form-control" placeholder="Например: Показ квартиры на Комендантском">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label>Дата</label>
+                <input type="date" id="client-task-date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Время</label>
+                <input type="time" id="client-task-time" class="form-control" value="14:00">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Заметки к задаче</label>
+              <input type="text" id="client-task-notes" class="form-control" placeholder="Ключи у консьержа">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;">
+            <button type="submit" onclick="window.autoExportClientTask = false" class="btn btn-secondary" style="flex: 1; justify-content: center;">💾 Только сохранить</button>
+            <button type="submit" onclick="window.autoExportClientTask = true" class="btn btn-emerald" style="flex: 1; justify-content: center;">🌐 💾 Сохранить и в Календарь</button>
+          </div>
         </form>
       </div>
     </div>
@@ -428,7 +472,10 @@
             <label>Детали / Описание</label>
             <textarea id="task-notes" class="form-control" rows="2" placeholder="Ключи у консьержа, встреча возле 2 подъезда"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">💾 Сохранить задачу</button>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;">
+            <button type="submit" onclick="window.autoExportToGoogle = false" class="btn btn-secondary" style="flex: 1; justify-content: center;">💾 Сохранить задачу</button>
+            <button type="submit" onclick="window.autoExportToGoogle = true" class="btn btn-emerald" style="flex: 1; justify-content: center;">🌐 💾 Сохранить и в Календарь</button>
+          </div>
         </form>
       </div>
     </div>
@@ -1001,6 +1048,14 @@
       document.getElementById('modal-import')?.classList.add('active');
     }
 
+    function resetClientTaskFields() {
+      if (document.getElementById('client-task-title')) document.getElementById('client-task-title').value = '';
+      if (document.getElementById('client-task-type')) document.getElementById('client-task-type').value = 'viewing';
+      if (document.getElementById('client-task-date')) document.getElementById('client-task-date').value = '';
+      if (document.getElementById('client-task-time')) document.getElementById('client-task-time').value = '14:00';
+      if (document.getElementById('client-task-notes')) document.getElementById('client-task-notes').value = '';
+    }
+
     function openClientModal() {
       if (!document.getElementById('modal-client')) return;
       document.getElementById('client-edit-id').value = '';
@@ -1014,6 +1069,7 @@
       document.getElementById('client-monthly-payment').value = '';
       document.getElementById('client-property').value = '';
       document.getElementById('client-notes').value = '';
+      resetClientTaskFields();
       document.getElementById('modal-client').classList.add('active');
     }
 
@@ -1022,7 +1078,7 @@
       if (!c) return;
 
       document.getElementById('client-edit-id').value = c.id;
-      document.getElementById('client-modal-title').innerText = 'Редактировать данные клиента';
+      document.getElementById('client-modal-title').innerText = 'Редактировать клиента';
       document.getElementById('client-name').value = c.name || '';
       document.getElementById('client-phone').value = c.phone || '';
       document.getElementById('client-type').value = c.type || 'buyer';
@@ -1032,6 +1088,7 @@
       document.getElementById('client-monthly-payment').value = c.monthlyPayment || '';
       document.getElementById('client-property').value = c.property || '';
       document.getElementById('client-notes').value = c.notes || '';
+      resetClientTaskFields();
 
       closeModals();
       document.getElementById('modal-client')?.classList.add('active');
@@ -1092,6 +1149,7 @@
     function saveClient(e) {
       e.preventDefault();
       const editId = document.getElementById('client-edit-id').value;
+      let targetClientId = editId;
 
       if (editId) {
         const idx = clients.findIndex(x => x.id === editId);
@@ -1107,8 +1165,9 @@
           clients[idx].notes = document.getElementById('client-notes').value;
         }
       } else {
+        targetClientId = 'cli-' + Date.now();
         const newClient = {
-          id: 'cli-' + Date.now(),
+          id: targetClientId,
           name: document.getElementById('client-name').value,
           phone: document.getElementById('client-phone').value,
           type: document.getElementById('client-type').value,
@@ -1125,13 +1184,39 @@
         }
       }
 
+      // Check if task fields inside client modal are filled
+      const taskTitle = document.getElementById('client-task-title')?.value.trim();
+      const taskDate = document.getElementById('client-task-date')?.value;
+      let createdTaskId = null;
+
+      if (taskTitle || taskDate) {
+        createdTaskId = 't-' + Date.now();
+        const newTask = {
+          id: createdTaskId,
+          title: taskTitle || 'Показ / Встреча',
+          type: document.getElementById('client-task-type')?.value || 'viewing',
+          clientId: targetClientId,
+          date: taskDate || new Date().toISOString().split('T')[0],
+          time: document.getElementById('client-task-time')?.value || '14:00',
+          notes: document.getElementById('client-task-notes')?.value || '',
+          done: false
+        };
+        tasks.unshift(newTask);
+      }
+
       closeModals();
       saveData();
+
+      if (window.autoExportClientTask && createdTaskId) {
+        exportTaskToGoogleCalendar(createdTaskId);
+      }
+      window.autoExportClientTask = false;
     }
 
     function saveTask(e) {
       e.preventDefault();
       const editId = document.getElementById('task-edit-id').value;
+      let savedTaskId = editId;
 
       if (editId) {
         const idx = tasks.findIndex(x => x.id === editId);
@@ -1144,8 +1229,9 @@
           tasks[idx].notes = document.getElementById('task-notes').value;
         }
       } else {
+        savedTaskId = 't-' + Date.now();
         const newTask = {
-          id: 't-' + Date.now(),
+          id: savedTaskId,
           title: document.getElementById('task-title').value,
           type: document.getElementById('task-type').value,
           clientId: document.getElementById('task-client-id').value,
@@ -1159,6 +1245,11 @@
 
       closeModals();
       saveData();
+
+      if (window.autoExportToGoogle && savedTaskId) {
+        exportTaskToGoogleCalendar(savedTaskId);
+      }
+      window.autoExportToGoogle = false;
     }
 
     function handleVcfUpload(e) {
