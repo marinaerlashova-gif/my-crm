@@ -213,6 +213,9 @@
                   <input type="checkbox" value="no_pv" onchange="togglePayTermFilter('no_pv')" class="payterm-checkbox"> 🚫 Без ПВ
                 </label>
                 <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="family_mortgage" onchange="togglePayTermFilter('family_mortgage')" class="payterm-checkbox"> 👨‍👩‍👧‍👦 Семейная ипотека
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
                   <input type="checkbox" value="mortgage" onchange="togglePayTermFilter('mortgage')" class="payterm-checkbox"> 🏦 Ипотека
                 </label>
                 <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
@@ -332,6 +335,7 @@
           <label class="form-label">Условия оплаты (быстрые теги)</label>
           <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
             <button type="button" class="chip" onclick="togglePaymentChip('🚫 Без ПВ')">🚫 Без ПВ</button>
+            <button type="button" class="chip" onclick="togglePaymentChip('👨‍👩‍👧‍👦 Семейная ипотека')">👨‍👩‍👧‍👦 Семейная ипотека</button>
             <button type="button" class="chip" onclick="togglePaymentChip('🏦 Ипотека')">🏦 Ипотека</button>
             <button type="button" class="chip" onclick="togglePaymentChip('⏳ Рассрочка')">⏳ Рассрочка</button>
             <button type="button" class="chip" onclick="togglePaymentChip('📜 Транш')">📜 Транш</button>
@@ -465,10 +469,10 @@
     const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
 
     // Force purge old legacy localStorage keys to fix 176 contacts bug
-    ['realty_crm_clients_v1', 'realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_v4', 'realty_crm_clients_cloud_v2', 'realty_crm_clients_master_145', 'realty_crm_clients_master_145_v2', 'realty_crm_clients_master_145_v3', 'realty_crm_clients_master_145_v4', 'crm_clients', 'clients', 'cloud_v2', 'cloud'].forEach(k => {
+    ['realty_crm_clients_v1', 'realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_v4', 'realty_crm_clients_cloud_v2', 'realty_crm_clients_master_145', 'realty_crm_clients_master_145_v2', 'realty_crm_clients_master_145_v3', 'realty_crm_clients_master_145_v4', 'realty_crm_clients_master_145_v5', 'crm_clients', 'clients', 'cloud_v2', 'cloud'].forEach(k => {
       try { localStorage.removeItem(k); } catch(e) {}
     });
-    const STORAGE_KEYS = ['realty_crm_clients_master_145_v5'];
+    const STORAGE_KEYS = ['realty_crm_clients_master_145_v6'];
 
     const STATUS_MAP = {
       lead: 'Новый лид',
@@ -503,7 +507,7 @@
     let selectedPayTerms = [];
 
     let localClients = getAllLocalClients();
-    let clients = (Array.isArray(localClients) && localClients.length > 0) ? deduplicateClientsList(localClients) : INITIAL_CLIENTS;
+    let clients = (Array.isArray(localClients) && localClients.length >= 145) ? deduplicateClientsList(localClients) : INITIAL_CLIENTS;
     let tasks = (Array.isArray(getAllLocalTasks()) && getAllLocalTasks().length > 0) ? getAllLocalTasks() : INITIAL_TASKS;
     let comments = (Array.isArray(getAllLocalComments()) && getAllLocalComments().length > 0) ? getAllLocalComments() : INITIAL_COMMENTS;
 
@@ -541,6 +545,9 @@
       }
 
       const payTermsList = paymentTerms ? paymentTerms.split(',').map(s=>s.trim()).filter(Boolean) : [];
+      if (/семейная|семейка|СИ/i.test(cleanedName) || /семейная|семейка|СИ/i.test(notes)) {
+        if (!payTermsList.some(p => p.includes("Семейная"))) payTermsList.push("👨‍👩‍👧‍👦 Семейная ипотека");
+      }
       if (/рассрочка/i.test(cleanedName) || /рассрочка/i.test(notes)) {
         if (!payTermsList.some(p => p.includes("Рассрочка"))) payTermsList.push("⏳ Рассрочка");
       }
@@ -696,20 +703,15 @@
       if (res && res.ok) {
         try {
           const data = await res.json();
-          if (data && Array.isArray(data.clients) && data.clients.length > 0) {
+          if (data && Array.isArray(data.clients) && data.clients.length >= 145) {
             cloudData = data;
           }
         } catch(e) {}
       }
 
-      let mergedClients = [];
-      if (cloudData && Array.isArray(cloudData.clients) && cloudData.clients.length > 0) {
-        mergedClients = deduplicateClientsList([...INITIAL_CLIENTS, ...localClients, ...cloudData.clients]);
-      } else {
-        mergedClients = deduplicateClientsList([...INITIAL_CLIENTS, ...localClients]);
-      }
+      let mergedClients = deduplicateClientsList([...INITIAL_CLIENTS, ...localClients, ...((cloudData && cloudData.clients) || [])]);
 
-      if (mergedClients.length !== 145) {
+      if (mergedClients.length < 145) {
         mergedClients = INITIAL_CLIENTS;
       }
 
@@ -863,6 +865,7 @@
           const termStr = String(c.paymentTerms || '') + ' ' + String(c.notes || '') + ' ' + String(c.name || '');
           const matchPay = (cond) => {
             if (cond === 'no_pv') return /без ПВ|без пв/i.test(termStr);
+            if (cond === 'family_mortgage') return /семейная|семейка|СИ/i.test(termStr);
             if (cond === 'mortgage') return /ипотека/i.test(termStr);
             if (cond === 'installment') return /рассрочка/i.test(termStr);
             if (cond === 'tranche') return /транш/i.test(termStr);
@@ -1311,6 +1314,7 @@
     }
 
     const PAY_LABELS = {
+      family_mortgage: '👨‍👩‍👧‍👦 Семейная ипотека',
       no_pv: '🚫 Без ПВ',
       mortgage: '🏦 Ипотека',
       installment: '⏳ Рассрочка',
@@ -1516,4 +1520,3 @@
   </script>
 </body>
 </html>
-,path:/home/user/render-app/index.html}}
