@@ -99,7 +99,7 @@
     .chip-opt { padding: 4px 8px; border-radius: 6px; background: #f1f5f9; font-size: 11px; cursor: pointer; border: 1px solid #cbd5e1; font-weight: 600; }
     .chip-opt.selected { background: #2563eb; color: white; border-color: #2563eb; }
     
-    /* Kanban Board */
+    /* Воронка продаж */
     .kanban-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
     .kanban-col { flex: 0 0 260px; background: #f1f5f9; border-radius: 10px; padding: 10px; border: 1px solid #e2e8f0; }
     .kanban-head { font-weight: 700; font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
@@ -119,7 +119,7 @@
       <div class="nav-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">📊 Дашборд</div>
       <div class="nav-tab" id="tab-clients" onclick="switchTab('clients')">👥 Клиенты</div>
       <div class="nav-tab" id="tab-tasks" onclick="switchTab('tasks')">📅 Задачи & Календарь</div>
-      <div class="nav-tab" id="tab-kanban" onclick="switchTab('kanban')">📋 Канбан</div>
+      <div class="nav-tab" id="tab-kanban" onclick="switchTab('kanban')">📋 Воронка продаж</div>
     </div>
   </header>
 
@@ -202,7 +202,7 @@
       <div id="tasks-full-list"></div>
     </div>
 
-    <!-- KANBAN TAB -->
+    <!-- PIPELINE / VORONKA TAB -->
     <div id="view-kanban" style="display:none;">
       <div class="kanban-grid" id="kanban-container"></div>
     </div>
@@ -1011,163 +1011,4 @@
       e.preventDefault();
       const id = document.getElementById('edit-task-id').value;
 
-      let taskObj = id ? tasks.find(x => x.id === id) : { id: 't-' + Date.now() };
-
-      taskObj.clientId = document.getElementById('task-client-id').value;
-      taskObj.title = document.getElementById('task-title').value;
-      taskObj.type = document.getElementById('task-type').value;
-      taskObj.date = document.getElementById('task-date').value;
-      taskObj.time = document.getElementById('task-time').value;
-      taskObj.done = document.getElementById('task-status').value === 'completed';
-      taskObj.notes = document.getElementById('task-notes').value;
-
-      if (!id) tasks.unshift(taskObj);
-
-      saveDataLocally();
-      pushLocalToCloud();
-      closeModals();
-      render();
-    }
-
-    function openDetailModal(clientId) {
-      const client = clients.find(c => c && c.id === clientId);
-      if (!client) return;
-
-      document.getElementById('detail-client-name').innerText = client.name || 'Без имени';
-      let clientComments = comments.filter(c => c && c.clientId === clientId);
-      const clientTasks = tasks.filter(t => t && t.clientId === clientId);
-
-      const modalBody = document.getElementById('detail-modal-body');
-      const purePhone = cleanPhone(client.phone);
-
-      modalBody.innerHTML = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:10px; margin-bottom:14px; font-size:13px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
-            <span class="status-tag status-${client.status || 'lead'}">${STATUS_MAP[client.status || 'lead']}</span>
-            <div>
-              ${purePhone ? `
-                <a href="https://api.whatsapp.com/send?phone=${purePhone}" target="_blank" class="social-btn wa-btn">WhatsApp</a>
-                <a href="https://t.me/+${purePhone}" target="_blank" class="social-btn tg-btn">Telegram</a>
-              ` : ''}
-            </div>
-          </div>
-          <div>📞 Телефон: <strong>${client.phone ? `<a href="tel:${purePhone}">${client.phone}</a>` : 'Не указан'}</strong></div>
-          ${client.budget ? `<div style="margin-top:2px;">💰 Бюджет: <strong>${client.budget}</strong></div>` : ''}
-          ${client.paymentTerms ? `<div style="margin-top:2px;">💳 Условия: <strong>${client.paymentTerms}</strong></div>` : ''}
-          ${client.property ? `<div style="margin-top:2px;">🏢 Запрос: <strong>${client.property}</strong></div>` : ''}
-          ${client.notes ? `<div style="margin-top:6px; background:#fff; padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0;">📝 ${client.notes}</div>` : ''}
-
-          <div style="margin-top:10px; display:flex; gap:6px; border-top:1px solid #e2e8f0; padding-top:8px;">
-            <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditClientModal('${client.id}')">✏️ Редактировать</button>
-            <button class="btn btn-emerald" style="font-size:11px; padding:4px 8px;" onclick="openTaskModal('${client.id}')">📅 + Запланировать задачу</button>
-          </div>
-        </div>
-
-        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px;">📅 Задачи клиента (${clientTasks.length})</h4>
-        <div style="margin-bottom:14px;">
-          ${clientTasks.map(t => `
-            <div style="background:white; border:1px solid #e2e8f0; padding:8px 10px; border-radius:8px; margin-bottom:4px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <div style="font-weight:700;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title}</div>
-                <div style="color:#64748b; font-size:11px;">📅 ${t.date || ''} в ${t.time || '12:00'}</div>
-              </div>
-              <div style="display:flex; gap:4px;">
-                <button class="btn btn-secondary" style="font-size:10px; padding:2px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
-              </div>
-            </div>
-          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic;">Задач по клиенту нет</div>'}
-        </div>
-
-        <h4 style="font-size:14px; font-weight:700; margin-bottom:6px;">💬 Добавить заметку</h4>
-        <div style="display:flex; gap:6px; margin-bottom:14px;">
-          <input type="text" id="new-comment-input" class="form-control" placeholder="Результат звонка или встречи...">
-          <button class="btn btn-primary" onclick="addComment('${client.id}')">Отправить</button>
-        </div>
-
-        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px;">📜 История заметок (${clientComments.length})</h4>
-        <div>
-          ${clientComments.map(c => `
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:8px; border-radius:6px; margin-bottom:6px; font-size:12px;">
-              <div style="color:#64748b; font-size:10px; margin-bottom:2px;">${c.date || c.createdAt || ''} • ${c.author || 'Марина'}</div>
-              <div style="color:#0f172a;">${c.text || ''}</div>
-            </div>
-          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic;">Заметок пока нет</div>'}
-        </div>
-      `;
-
-      document.getElementById('detail-modal').classList.add('active');
-    }
-
-    function addComment(clientId) {
-      const input = document.getElementById('new-comment-input');
-      if (!input || !input.value.trim()) return;
-
-      const newCom = {
-        id: 'com-' + Date.now(),
-        clientId: clientId,
-        text: input.value.trim(),
-        date: new Date().toLocaleString('ru-RU'),
-        author: 'Марина'
-      };
-
-      comments.unshift(newCom);
-      saveDataLocally();
-      pushLocalToCloud();
-      openDetailModal(clientId);
-    }
-
-    function exportTaskToGoogleCalendar(taskId) {
-      const t = tasks.find(x => x.id === taskId);
-      if (!t) return;
-
-      const client = clients.find(c => c.id === t.clientId);
-      const title = encodeURIComponent(`${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} — ${client ? client.name : ''}`);
-      const details = encodeURIComponent(`Клиент: ${client ? client.name + ' (' + client.phone + ')' : 'Не указан'}\nБюджет: ${client?.budget || ''}\nЗапрос: ${client?.property || ''}\nЗаметка: ${t.notes || ''}`);
-
-      const startTime = t.date ? t.date.replace(/-/g, '') + 'T' + (t.time || '12:00').replace(':', '') + '00' : '';
-      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${startTime}/${startTime}`;
-
-      window.open(url, '_blank');
-    }
-
-    function togglePaymentChip(val) {
-      const input = document.getElementById('client-payment-terms');
-      let current = input.value ? input.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
-      if (current.includes(val)) {
-        current = current.filter(x => x !== val);
-      } else {
-        current.push(val);
-      }
-      input.value = current.join(', ');
-      syncPaymentChipsFromInput();
-    }
-
-    function syncPaymentChipsFromInput() {
-      const inputVal = document.getElementById('client-payment-terms')?.value || '';
-      document.querySelectorAll('#payment-chips .chip-opt').forEach(chip => {
-        const text = (chip.innerText || chip.textContent || '').trim();
-        if (inputVal.includes(text)) {
-          chip.classList.add('selected');
-        } else {
-          chip.classList.remove('selected');
-        }
-      });
-    }
-
-    function setFilter(status, el) {
-      currentFilter = status;
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      render();
-    }
-
-    function closeModals() {
-      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-    }
-
-    window.onload = () => {
-      loadCloudData();
-    };
-  </script>
-</body>
-</html>
+      let taskObj = id ? tasks.find(x => x.id === id) : { id: 't-' + 
