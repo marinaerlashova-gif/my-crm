@@ -25,11 +25,10 @@
     .stat-val { font-size: 22px; font-weight: 800; color: #2563eb; margin-top: 4px; }
     .stat-lbl { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
 
-    .controls-bar { background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .controls-bar { background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
     .search-input { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
     .search-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    
-    .filter-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+
     .chip { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #cbd5e1; background: white; color: #475569; cursor: pointer; white-space: nowrap; }
     .chip.active { background: #2563eb; color: white; border-color: #2563eb; }
 
@@ -88,6 +87,11 @@
 
     .quick-add-bar { position: fixed; bottom: 16px; right: 16px; z-index: 999; }
     .fab { width: 52px; height: 52px; border-radius: 50%; background: #2563eb; color: white; border: none; font-size: 24px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.4); cursor: pointer; display: flex; justify-content: center; align-items: center; }
+
+    @media (max-width: 600px) {
+      #filter-groups-grid { grid-template-columns: 1fr !important; }
+      #filter-dropdown-panel { left: -10px !important; right: -10px !important; }
+    }
   </style>
 </head>
 <body>
@@ -147,25 +151,90 @@
 
     <!-- VIEW 2: CLIENTS -->
     <div id="view-clients" style="display:none;">
-      <div class="controls-bar">
-        <input type="text" id="search-input" class="search-input" placeholder="🔍 Поиск по ФИО, телефону, примечаниям или тегам..." oninput="renderClients()">
-        
-        <div class="filter-scroll">
-          <button class="chip active" onclick="setFilter('all', this)">Все (145)</button>
-          <button class="chip" onclick="setFilter('pay_no_pv', this)">🚫 Без ПВ</button>
-          <button class="chip" onclick="setFilter('pay_mortgage', this)">🏦 Ипотека</button>
-          <button class="chip" onclick="setFilter('pay_installment', this)">⏳ Рассрочка</button>
-          <button class="chip" onclick="setFilter('pay_tranche', this)">📜 Транш</button>
-          <button class="chip" onclick="setFilter('pay_matcap', this)">👨‍👩‍👧 Маткапитал</button>
-          <button class="chip" onclick="setFilter('pay_cash', this)">💵 Наличные</button>
-          <button class="chip" onclick="setFilter('lead', this)">Новый лид</button>
-          <button class="chip" onclick="setFilter('in_progress', this)">В работе</button>
-          <button class="chip" onclick="setFilter('shows', this)">Показы</button>
-          <button class="chip" onclick="setFilter('negotiations', this)">Переговоры</button>
-          <button class="chip" onclick="setFilter('deal', this)">Сделка</button>
-          <button class="chip" onclick="setFilter('purchased', this)">Уже купили</button>
-          <button class="chip" onclick="setFilter('no_answer', this)">📵 Не отвечает</button>
-          <button class="chip" onclick="setFilter('not_relevant', this)">❌ Не актуально</button>
+      <div class="controls-bar" style="position:relative; background:white; padding:12px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:16px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="search-input" class="search-input" placeholder="🔍 Поиск по ФИО, телефону, примечаниям или тегам..." oninput="renderClients()" style="flex:1; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; outline:none;">
+          
+          <button class="btn btn-secondary" id="filter-dropdown-btn" onclick="toggleFilterDropdown(event)" style="white-space:nowrap; padding:10px 14px; font-weight:700; display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #cbd5e1; border-radius:8px; cursor:pointer;">
+            ⚙️ Фильтры <span id="filter-badge" style="background:#2563eb; color:white; font-size:11px; padding:2px 6px; border-radius:10px; display:none;">0</span>
+          </button>
+        </div>
+
+        <div id="active-filters-bar" style="display:none; flex-wrap:wrap; gap:6px; margin-top:8px; align-items:center; padding-top:8px; border-top:1px solid #f1f5f9;">
+          <span style="font-size:11px; font-weight:700; color:#64748b;">Выбрано:</span>
+          <div id="active-filter-chips" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+          <button class="btn btn-secondary" style="font-size:11px; padding:2px 8px; color:#dc2626;" onclick="clearAllFilters()">Сбросить всё ✕</button>
+        </div>
+
+        <div id="filter-dropdown-panel" style="display:none; position:absolute; top:100%; right:0; left:0; background:white; border:1px solid #cbd5e1; border-radius:12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.15); z-index:10000; padding:16px; margin-top:6px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:12px;">
+            <div style="font-weight:800; font-size:14px; color:#0f172a;">⚙️ Фильтр контактов (выберите один или несколько)</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px; color:#dc2626;" onclick="clearAllFilters()">Сбросить все</button>
+              <button class="close-btn" style="width:24px; height:24px; font-size:14px; background:#f1f5f9; border:none; border-radius:50%; cursor:pointer;" onclick="closeFilterDropdown()">×</button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;" id="filter-groups-grid">
+            <div>
+              <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:8px;">🎯 Этап воронки</div>
+              <div style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="lead" onchange="toggleStatusFilter('lead')" class="status-checkbox"> Новый лид
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="in_progress" onchange="toggleStatusFilter('in_progress')" class="status-checkbox"> В работе
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="shows" onchange="toggleStatusFilter('shows')" class="status-checkbox"> Показы
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="negotiations" onchange="toggleStatusFilter('negotiations')" class="status-checkbox"> Переговоры
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="deal" onchange="toggleStatusFilter('deal')" class="status-checkbox"> Сделка
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="purchased" onchange="toggleStatusFilter('purchased')" class="status-checkbox"> Уже купили
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="no_answer" onchange="toggleStatusFilter('no_answer')" class="status-checkbox"> 📵 Не отвечает
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="not_relevant" onchange="toggleStatusFilter('not_relevant')" class="status-checkbox"> ❌ Не актуально
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:8px;">💳 Условия оплаты</div>
+              <div style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="no_pv" onchange="togglePayTermFilter('no_pv')" class="payterm-checkbox"> 🚫 Без ПВ
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="mortgage" onchange="togglePayTermFilter('mortgage')" class="payterm-checkbox"> 🏦 Ипотека
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="installment" onchange="togglePayTermFilter('installment')" class="payterm-checkbox"> ⏳ Рассрочка
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="tranche" onchange="togglePayTermFilter('tranche')" class="payterm-checkbox"> 📜 Транш
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="matcap" onchange="togglePayTermFilter('matcap')" class="payterm-checkbox"> 👨‍👩‍👧 Маткапитал
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                  <input type="checkbox" value="cash" onchange="togglePayTermFilter('cash')" class="payterm-checkbox"> 💵 Наличные
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:12px; margin-top:12px;">
+            <span style="font-size:12px; font-weight:700; color:#334155;" id="filter-result-count">Найдено контактов: 145</span>
+            <button class="btn btn-primary" onclick="closeFilterDropdown()" style="padding:6px 16px;">Применить</button>
+          </div>
         </div>
       </div>
 
@@ -430,11 +499,13 @@
     const INITIAL_TASKS = [{"id":"task-1","clientId":"cli-17861010139000.6132825792436806","title":"Созвон по поводу выезда из Турции","type":"call","date":"2026-08-22","time":"12:00","notes":"Узнать когда прилетит на сделку по Сэтл Ривьера","done":false},{"id":"task-2","clientId":"cli-17861010139000.39997637366264094","title":"Проверить статус продажи переуступки","type":"call","date":"2026-08-10","time":"15:00","notes":"Спросить у Али продалась ли переуступка с ПН","done":false},{"id":"task-3","clientId":"cli-17861010139000.8919461852785073","title":"Предложить новые варианты в ЖК по синей ветке","type":"call","date":"2026-08-12","time":"11:00","notes":"Адик (СВО), отправил запросы по 2к под семейку","done":false},{"id":"task-4","clientId":"cli-17861010139000.38806083701113137","title":"Уточнить поиск вторички на севере","type":"call","date":"2026-08-15","time":"14:00","notes":"Али Султанов — повторное предложение услуг","done":false},{"id":"task-5","clientId":"cli-17861010139000.9787775773794772","title":"Контрольный звонок по юрлицу","type":"call","date":"2026-08-20","time":"16:30","notes":"Андрей — пришли ли деньги от юрлица на 1к инвест","done":false},{"id":"task-6","clientId":"cli-17861010139000.7410690406560204","title":"Узнать как самочувствие после родов","type":"call","date":"2026-08-08","time":"10:00","notes":"Алина2 — спросить родила ли и планируем ли Пулково Лейк","done":false},{"id":"task-7","clientId":"cli-17861010139000.015786595023340566","title":"Повторный запрос информации","type":"call","date":"2026-08-09","time":"13:00","notes":"Анастасия — написать еще раз по подборке","done":false}];
     const INITIAL_COMMENTS = [{"id":"com-1","clientId":"cli-17861010139000.6132825792436806","text":"Обсудили все условия покупки Сэтл Ривьера. ПВ 1 млн. Сказала свяжется после 22 августа.","date":"2026-08-01 14:20","author":"Марина"},{"id":"com-2","clientId":"cli-17861010139000.39997637366264094","text":"Остановились на Имена и Борский. Ждем продажу переуступки.","date":"2026-08-02 11:15","author":"Марина"},{"id":"com-3","clientId":"cli-17861010139000.8919461852785073","text":"Отец 5 детей, сейчас на СВО. Нужна 2к на синей ветке под семейную ипотеку.","date":"2026-08-03 16:45","author":"Марина"},{"id":"com-4","clientId":"cli-17861010139000.8906175166974581","text":"Остановились на Квартал Лаголово от Самолета. Купили напрямую.","date":"2026-08-04 09:30","author":"Марина"},{"id":"com-5","clientId":"cli-17861010139000.014090702063149552","text":"Купили квартиру во Владикавказе, клиент закрыт.","date":"2026-08-04 18:00","author":"Марина"},{"id":"com-6","clientId":"cli-17861010139000.4233038779559094","text":"Вышли на сделку с другим агентом через мужа.","date":"2026-08-05 12:10","author":"Марина"},{"id":"com-7","clientId":"cli-17861010139000.6429644011322132","text":"Приостановили поиск квартиры.","date":"2026-08-05 15:40","author":"Марина"},{"id":"com-8","clientId":"cli-17861010139000.48792069847902575","text":"Хотела готовую подборку. Индивидуальная не подходит.","date":"2026-08-06 10:05","author":"Марина"},{"id":"com-9","clientId":"cli-17861010139000.7888404624190042","text":"Решили деньги пустить в другое русло, на сообщения не отвечают.","date":"2026-08-06 14:30","author":"Марина"},{"id":"com-10","clientId":"cli-17861010139000.015786595023340566","text":"Написала, что вернется позже с ответом.","date":"2026-08-07 09:15","author":"Марина"},{"id":"com-11","clientId":"cli-17861010139000.020229030214719668","text":"Перестала выходить на связь после подборки.","date":"2026-08-07 11:50","author":"Марина"},{"id":"com-12","clientId":"cli-17861010139000.9769521921030863","text":"Уже есть свой агент.","date":"2026-08-07 13:25","author":"Марина"},{"id":"com-13","clientId":"cli-17861010139000.4820229924157525","text":"Не удалось дозвониться.","date":"2026-08-07 16:00","author":"Марина"},{"id":"com-14","clientId":"cli-17861010139000.21728332263813677","text":"Не отвечает на звонки и сообщения.","date":"2026-08-07 17:10","author":"Марина"},{"id":"com-15","clientId":"cli-17861010139000.13882262583814542","text":"Гражданка Туркменистана, пока нет работы для ипотеки.","date":"2026-08-07 18:30","author":"Марина"},{"id":"com-16","clientId":"cli-17861010139000.38806083701113137","text":"Ищет 2к на севере, перешла на вторичку.","date":"2026-08-08 09:00","author":"Марина"},{"id":"com-17","clientId":"cli-17861010139000.9787775773794772","text":"Ждет денег от юрлица. Продает Аурум.","date":"2026-08-08 10:20","author":"Марина"},{"id":"com-18","clientId":"cli-17861010139000.7410690406560204","text":"Понравился Пулково Лейк, потом сильно заболела.","date":"2026-08-08 11:40","author":"Марина"}];
 
+    let selectedStatuses = [];
+    let selectedPayTerms = [];
+
     let localClients = getAllLocalClients();
     let clients = (Array.isArray(localClients) && localClients.length > 0) ? deduplicateClientsList(localClients) : INITIAL_CLIENTS;
     let tasks = (Array.isArray(getAllLocalTasks()) && getAllLocalTasks().length > 0) ? getAllLocalTasks() : INITIAL_TASKS;
     let comments = (Array.isArray(getAllLocalComments()) && getAllLocalComments().length > 0) ? getAllLocalComments() : INITIAL_COMMENTS;
-    let currentFilter = 'all';
 
     function cleanClientObject(c) {
       if (!c) return c;
@@ -783,17 +854,23 @@
       const filtered = clients.filter(c => {
         if (!c) return false;
 
-        if (currentFilter.startsWith('pay_')) {
-          const cond = currentFilter.replace('pay_', '');
+        if (selectedStatuses.length > 0) {
+          const st = c.status || 'lead';
+          if (!selectedStatuses.includes(st)) return false;
+        }
+
+        if (selectedPayTerms.length > 0) {
           const termStr = String(c.paymentTerms || '') + ' ' + String(c.notes || '') + ' ' + String(c.name || '');
-          if (cond === 'no_pv' && !/без ПВ|без пв/i.test(termStr)) return false;
-          if (cond === 'mortgage' && !/ипотека/i.test(termStr)) return false;
-          if (cond === 'installment' && !/рассрочка/i.test(termStr)) return false;
-          if (cond === 'tranche' && !/транш/i.test(termStr)) return false;
-          if (cond === 'matcap' && !/маткапитал|МК/i.test(termStr)) return false;
-          if (cond === 'cash' && !/наличные/i.test(termStr)) return false;
-        } else if (currentFilter !== 'all' && c.status !== currentFilter) {
-          return false;
+          const matchPay = (cond) => {
+            if (cond === 'no_pv') return /без ПВ|без пв/i.test(termStr);
+            if (cond === 'mortgage') return /ипотека/i.test(termStr);
+            if (cond === 'installment') return /рассрочка/i.test(termStr);
+            if (cond === 'tranche') return /транш/i.test(termStr);
+            if (cond === 'matcap') return /маткапитал|МК/i.test(termStr);
+            if (cond === 'cash') return /наличные/i.test(termStr);
+            return false;
+          };
+          if (!selectedPayTerms.some(matchPay)) return false;
         }
 
         if (query) {
@@ -808,6 +885,11 @@
       });
 
       filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru'));
+
+      const resultCountEl = document.getElementById('filter-result-count');
+      if (resultCountEl) {
+        resultCountEl.innerText = 'Найдено контактов: ' + filtered.length;
+      }
 
       if (!filtered.length) {
         container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#94a3b8; font-size:14px;">Контакты не найдены</div>';
@@ -1228,12 +1310,123 @@
       input.value = current.join(', ');
     }
 
-    function setFilter(filter, el) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-scroll .chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
+    const PAY_LABELS = {
+      no_pv: '🚫 Без ПВ',
+      mortgage: '🏦 Ипотека',
+      installment: '⏳ Рассрочка',
+      tranche: '📜 Транш',
+      matcap: '👨‍👩‍👧 Маткапитал',
+      cash: '💵 Наличные'
+    };
+
+    function toggleFilterDropdown(e) {
+      if (e) e.stopPropagation();
+      const panel = document.getElementById('filter-dropdown-panel');
+      if (!panel) return;
+      const isVisible = panel.style.display === 'block';
+      panel.style.display = isVisible ? 'none' : 'block';
+    }
+
+    function closeFilterDropdown() {
+      const panel = document.getElementById('filter-dropdown-panel');
+      if (panel) panel.style.display = 'none';
+    }
+
+    function toggleStatusFilter(status) {
+      if (selectedStatuses.includes(status)) {
+        selectedStatuses = selectedStatuses.filter(s => s !== status);
+      } else {
+        selectedStatuses.push(status);
+      }
+      syncFilterUI();
       renderClients();
     }
+
+    function togglePayTermFilter(payTerm) {
+      if (selectedPayTerms.includes(payTerm)) {
+        selectedPayTerms = selectedPayTerms.filter(p => p !== payTerm);
+      } else {
+        selectedPayTerms.push(payTerm);
+      }
+      syncFilterUI();
+      renderClients();
+    }
+
+    function removeStatusFilter(status) {
+      selectedStatuses = selectedStatuses.filter(s => s !== status);
+      syncFilterUI();
+      renderClients();
+    }
+
+    function removePayTermFilter(payTerm) {
+      selectedPayTerms = selectedPayTerms.filter(p => p !== payTerm);
+      syncFilterUI();
+      renderClients();
+    }
+
+    function clearAllFilters() {
+      selectedStatuses = [];
+      selectedPayTerms = [];
+      syncFilterUI();
+      renderClients();
+    }
+
+    function syncFilterUI() {
+      document.querySelectorAll('.status-checkbox').forEach(cb => {
+        cb.checked = selectedStatuses.includes(cb.value);
+      });
+      document.querySelectorAll('.payterm-checkbox').forEach(cb => {
+        cb.checked = selectedPayTerms.includes(cb.value);
+      });
+
+      const totalCount = selectedStatuses.length + selectedPayTerms.length;
+      const badge = document.getElementById('filter-badge');
+      const btn = document.getElementById('filter-dropdown-btn');
+
+      if (badge) {
+        if (totalCount > 0) {
+          badge.innerText = totalCount;
+          badge.style.display = 'inline-block';
+          if (btn) btn.style.borderColor = '#2563eb';
+        } else {
+          badge.style.display = 'none';
+          if (btn) btn.style.borderColor = '#cbd5e1';
+        }
+      }
+
+      const activeBar = document.getElementById('active-filters-bar');
+      const chipsContainer = document.getElementById('active-filter-chips');
+
+      if (activeBar && chipsContainer) {
+        if (totalCount > 0) {
+          activeBar.style.display = 'flex';
+          let chipsHtml = '';
+
+          selectedStatuses.forEach(st => {
+            chipsHtml += `<span class="chip active" style="font-size:11px; padding:3px 8px; display:inline-flex; align-items:center; gap:4px; background:#2563eb; color:white; border-radius:20px; font-weight:600; cursor:pointer;" onclick="removeStatusFilter('${st}')">${STATUS_MAP[st] || st} ✕</span>`;
+          });
+
+          selectedPayTerms.forEach(pt => {
+            chipsHtml += `<span class="chip active" style="font-size:11px; padding:3px 8px; display:inline-flex; align-items:center; gap:4px; background:#059669; color:white; border-radius:20px; font-weight:600; cursor:pointer;" onclick="removePayTermFilter('${pt}')">${PAY_LABELS[pt] || pt} ✕</span>`;
+          });
+
+          chipsContainer.innerHTML = chipsHtml;
+        } else {
+          activeBar.style.display = 'none';
+          chipsContainer.innerHTML = '';
+        }
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('filter-dropdown-panel');
+      const btn = document.getElementById('filter-dropdown-btn');
+      if (panel && panel.style.display === 'block') {
+        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+          panel.style.display = 'none';
+        }
+      }
+    });
 
     function openImportModal() {
       closeModals();
@@ -1323,3 +1516,4 @@
   </script>
 </body>
 </html>
+,path:/home/user/render-app/index.html}}
