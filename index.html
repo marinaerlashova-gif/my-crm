@@ -2,321 +2,294 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RealtyCRM Pro — Мобильная CRM для риелтора</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealtyCRM Pro — Мастер 145</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#2563eb">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f8fafc; color: #0f172a; padding-bottom: 70px; }
+    body { background-color: #f1f5f9; color: #0f172a; padding-bottom: 70px; }
+
+    header { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    header h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+    header .status-indicator { font-size: 11px; background: #22c55e; color: #0f172a; padding: 2px 8px; border-radius: 12px; font-weight: 700; }
+
+    .main-layout { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #e2e8f0; padding: 4px; border-radius: 12px; overflow-x: auto; }
+    .nav-btn { flex: 1; padding: 10px 16px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center; white-space: nowrap; }
+    .nav-btn.active { background: white; color: #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat-card { background: white; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .stat-val { font-size: 22px; font-weight: 800; color: #2563eb; margin-top: 4px; }
+    .stat-lbl { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+
+    .controls-bar { background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .search-input { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    .search-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     
-    /* Header */
-    header { background: #1e293b; color: white; padding: 12px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .logo { font-size: 18px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .badge-pro { background: #eff6ff; color: #2563eb; font-size: 10px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; border: 1px solid #bfdbfe; font-weight: 700; }
+    .filter-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+    .chip { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #cbd5e1; background: white; color: #475569; cursor: pointer; white-space: nowrap; }
+    .chip.active { background: #2563eb; color: white; border-color: #2563eb; }
 
-    .nav-tabs { display: flex; gap: 4px; border-top: 1px solid #334155; padding-top: 8px; overflow-x: auto; }
-    .nav-tab { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #94a3b8; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-    .nav-tab.active { background: #38bdf8; color: #0f172a; }
+    .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (max-width: 768px) { .cards-grid { grid-template-columns: 1fr; } }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 12px; }
+    .client-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; transition: transform 0.1s; }
+    .client-card:active { transform: scale(0.99); }
+    .client-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .client-name { font-weight: 800; font-size: 15px; color: #0f172a; line-height: 1.2; }
+    .role-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #e0f2fe; color: #0369a1; text-transform: uppercase; }
 
-    /* Buttons */
-    .btn { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; text-decoration: none; }
+    .status-tag { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-align: center; white-space: nowrap; }
+    .status-lead { background: #fef3c7; color: #b45309; }
+    .status-in_progress { background: #dbeafe; color: #1d4ed8; }
+    .status-shows { background: #f3e8ff; color: #6b21a8; }
+    .status-negotiations { background: #ffedd5; color: #c2410c; }
+    .status-deal { background: #dcfce7; color: #15803d; }
+    .status-purchased { background: #ccfbf1; color: #0f766e; }
+    .status-no_answer { background: #f1f5f9; color: #64748b; }
+    .status-not_relevant { background: #fee2e2; color: #b91c1c; }
+
+    .client-contact-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #475569; }
+    .client-contact-row a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    .social-btn { display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 6px; text-decoration: none; font-size: 10px; font-weight: 700; color: white; }
+    .wa-btn { background: #25d366; }
+    .tg-btn { background: #0088cc; }
+
+    .client-params-inline { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; margin-top: 4px; }
+    .param-pill { background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #334155; }
+
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+
+    .btn { padding: 6px 12px; border-radius: 6px; border: none; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
     .btn-primary { background: #2563eb; color: white; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-secondary { background: #e2e8f0; color: #475569; }
-    .btn-secondary:hover { background: #cbd5e1; }
-    .btn-emerald { background: #059669; color: white; }
-    .btn-emerald:hover { background: #047857; }
-    .btn-purple { background: #8b5cf6; color: white; }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .btn-emerald { background: #10b981; color: white; }
 
-    /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-    @media (max-width: 640px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-    .stat-card { background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .stat-val { font-size: 20px; font-weight: 800; color: #0f172a; }
-    .stat-lbl { font-size: 11px; color: #64748b; margin-top: 2px; font-weight: 600; }
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 100000 !important; padding: 12px; }
+    .modal-backdrop.active { display: flex !important; }
+    .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative; animation: modalPop 0.15s ease-out; }
+    @keyframes modalPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    /* Banner */
-    .banner { background: linear-gradient(135deg, #1e3a8a, #2563eb, #1e293b); color: #ffffff; padding: 18px; border-radius: 14px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
-    .banner h1 { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
-    .banner p { font-size: 12px; color: #dbeafe; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; }
+    .modal-title { font-size: 16px; font-weight: 800; color: #0f172a; }
+    .close-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: 800; cursor: pointer; color: #64748b; }
 
-    /* Toolbar & Search */
-    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .search-box { flex: 1; min-width: 220px; position: relative; }
-    .search-input { width: 100%; padding: 8px 12px 8px 34px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; background: white; }
-    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-
-    /* Filters */
-    .filters-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; }
-    .filter-chip { padding: 5px 12px; border-radius: 16px; background: #e2e8f0; color: #475569; font-size: 12px; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
-    .filter-chip.active { background: #2563eb; color: white; }
-
-    /* Client Card Grid: 2 columns desktop, 1 column mobile */
-    .client-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (max-width: 768px) { .client-grid { grid-template-columns: 1fr; gap: 10px; } }
-
-    .client-card { background: white; border-radius: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.1s, box-shadow 0.1s; cursor: pointer; }
-    .client-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-    .client-name { font-weight: 700; font-size: 15px; color: #0f172a; }
-    .role-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #475569; font-weight: 600; margin-left: 6px; }
-
-    .urgency-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
-    .urgency-urgent { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
-    .urgency-month { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-    .urgency-future { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-
-    .client-contact-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
-    .client-contact-row a { text-decoration: none; color: #2563eb; font-weight: 600; }
-    .social-btn { font-size: 10px; padding: 2px 6px; border-radius: 4px; text-decoration: none; font-weight: 700; }
-    .wa-btn { background: #dcfce7; color: #166534; }
-    .tg-btn { background: #e0f2fe; color: #0369a1; }
-
-    .client-params-inline { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
-    .param-pill { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; }
-    .tag-badge { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 600; cursor: pointer; display: inline-block; margin-right: 2px; }
-
-    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid #f1f5f9; }
-
-    /* Center Popup Modals */
-    .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.75) !important; display: none; justify-content: center; align-items: center; z-index: 99990 !important; padding: 16px; overflow-y: auto; }
-    .modal-overlay.active { display: flex !important; }
-
-    #client-modal { z-index: 100000 !important; }
-    #task-modal { z-index: 100001 !important; }
-    #detail-modal { z-index: 99995 !important; }
-
-    .modal-card { background: #ffffff !important; border-radius: 16px !important; width: 100% !important; max-width: 580px !important; max-height: 90vh !important; overflow-y: auto !important; padding: 20px !important; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important; position: relative !important; margin: auto !important; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-    .modal-title { font-size: 16px; font-weight: 700; color: #0f172a; }
-    .close-btn { font-size: 20px; border: none; background: none; cursor: pointer; color: #94a3b8; }
-
-    .form-group { margin-bottom: 10px; }
-    .form-label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    .form-control { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; }
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; }
+    .form-control { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
     .form-control:focus { border-color: #2563eb; }
-    .chip-selector { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .chip-opt { padding: 4px 8px; border-radius: 6px; background: #f1f5f9; font-size: 11px; cursor: pointer; border: 1px solid #cbd5e1; font-weight: 600; }
-    .chip-opt.selected { background: #2563eb; color: white; border-color: #2563eb; }
 
-    /* Воронка продаж */
-    .kanban-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
-    .kanban-col { flex: 0 0 260px; background: #f1f5f9; border-radius: 10px; padding: 10px; border: 1px solid #e2e8f0; }
-    .kanban-head { font-weight: 700; font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .kanban-board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; }
+    .kanban-col { flex: 0 0 260px; background: #e2e8f0; border-radius: 12px; padding: 10px; min-height: 500px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-title { font-size: 12px; font-weight: 800; color: #334155; display: flex; justify-content: space-between; margin-bottom: 4px; text-transform: uppercase; }
+
+    .quick-add-bar { position: fixed; bottom: 16px; right: 16px; z-index: 999; }
+    .fab { width: 52px; height: 52px; border-radius: 50%; background: #2563eb; color: white; border: none; font-size: 24px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.4); cursor: pointer; display: flex; justify-content: center; align-items: center; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="header-top">
-      <div class="logo">🏢 RealtyCRM <span class="badge-pro">Pro</span></div>
-      <div class="header-actions">
-        <button class="btn btn-purple" onclick="openImportModal()">📥 Импорт vCard</button>
-        <button class="btn btn-emerald" onclick="openClientModal()">+ Клиент</button>
-        <button class="btn btn-primary" onclick="openTaskModal()">+ Задача</button>
-      </div>
-    </div>
-    <div class="nav-tabs">
-      <div class="nav-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">📊 Рабочий стол</div>
-      <div class="nav-tab" id="tab-clients" onclick="switchTab('clients')">👥 Клиенты</div>
-      <div class="nav-tab" id="tab-tasks" onclick="switchTab('tasks')">📅 Задачи & Календарь</div>
-      <div class="nav-tab" id="tab-kanban" onclick="switchTab('kanban')">📋 Воронка продаж</div>
+    <h1>🏢 RealtyCRM Pro <span class="status-indicator">Мастер 145</span></h1>
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openImportModal()">📥 vCard / Текст</button>
+      <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="recoverAllLocalContacts()">🔄 Сброс (145)</button>
     </div>
   </header>
 
-  <div class="container">
-    
-    <!-- DASHBOARD VIEW -->
-    <div id="view-dashboard">
-      <div class="banner">
-        <h1>🏢 RealtyCRM Pro — Управляйте объектами и клиентами легко</h1>
-        <p>Полный контроль над базой 145 клиентов, задачами и показами в одном месте</p>
-      </div>
+  <div class="main-layout">
+    <div class="nav-tabs">
+      <button class="nav-btn active" id="tab-dashboard" onclick="switchTab('dashboard')">📊 Рабочий стол</button>
+      <button class="nav-btn" id="tab-clients" onclick="switchTab('clients')">👥 Контакты (145)</button>
+      <button class="nav-btn" id="tab-tasks" onclick="switchTab('tasks')">📅 Календарь задач</button>
+      <button class="nav-btn" id="tab-kanban" onclick="switchTab('kanban')">🎯 Воронка продаж</button>
+    </div>
 
+    <!-- VIEW 1: DASHBOARD -->
+    <div id="view-dashboard">
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-val" id="stat-clients-count">145</div>
           <div class="stat-lbl">Всего контактов</div>
+          <div class="stat-val" id="stat-clients-count">145</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val" style="color:#2563eb;" id="stat-active-clients">0</div>
           <div class="stat-lbl">В работе</div>
+          <div class="stat-val" style="color:#d97706;" id="stat-active-clients">0</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val" style="color:#059669;" id="stat-deals-count">0</div>
           <div class="stat-lbl">Сделки</div>
+          <div class="stat-val" style="color:#10b981;" id="stat-deals-count">0</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val" style="color:#d97706;" id="stat-today-tasks">0</div>
           <div class="stat-lbl">Задачи на сегодня</div>
+          <div class="stat-val" style="color:#8b5cf6;" id="stat-today-tasks">0</div>
         </div>
       </div>
 
-      <div style="background:white; border-radius:10px; padding:12px; border:1px solid #e2e8f0; margin-bottom:16px;">
-        <div style="font-weight:700; font-size:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-          <span>📅 Предстоящие задачи и встречи</span>
-          <button class="btn btn-secondary" style="font-size:11px; padding:2px 8px;" onclick="switchTab('tasks')">Все задачи ➔</button>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div style="background:white; border-radius:12px; border:1px solid #e2e8f0; padding:16px;">
+          <h3 style="font-size:14px; font-weight:800; margin-bottom:12px; color:#0f172a; display:flex; justify-content:space-between; align-items:center;">
+            <span>📌 Ближайшие задачи на сегодня</span>
+            <button class="btn btn-primary" style="font-size:11px; padding:2px 6px;" onclick="openTaskModal()">+ Задача</button>
+          </h3>
+          <div id="today-tasks-list"></div>
         </div>
-        <div id="today-tasks-list"></div>
-      </div>
 
-      <div style="background:white; border-radius:10px; padding:12px; border:1px solid #e2e8f0;">
-        <div style="font-weight:700; font-size:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-          <span>🔥 Последние активные клиенты</span>
-          <button class="btn btn-secondary" style="font-size:11px; padding:2px 8px;" onclick="switchTab('clients')">Все контакты (145) ➔</button>
+        <div style="background:white; border-radius:12px; border:1px solid #e2e8f0; padding:16px;">
+          <h3 style="font-size:14px; font-weight:800; margin-bottom:12px; color:#0f172a;">⚡ Последние активные контакты</h3>
+          <div id="recent-clients-list"></div>
         </div>
-        <div id="recent-clients-list"></div>
       </div>
     </div>
 
-    <!-- CLIENTS VIEW -->
+    <!-- VIEW 2: CLIENTS -->
     <div id="view-clients" style="display:none;">
-      <div class="toolbar">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="search-input" class="search-input" placeholder="Поиск по имени, телефону, хэштегам #Аурум..." oninput="render()">
+      <div class="controls-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="🔍 Поиск по ФИО, телефону, примечаниям или тегам..." oninput="renderClients()">
+        
+        <div class="filter-scroll">
+          <button class="chip active" onclick="setFilter('all', this)">Все (145)</button>
+          <button class="chip" onclick="setFilter('pay_no_pv', this)">🚫 Без ПВ</button>
+          <button class="chip" onclick="setFilter('pay_mortgage', this)">🏦 Ипотека</button>
+          <button class="chip" onclick="setFilter('pay_installment', this)">⏳ Рассрочка</button>
+          <button class="chip" onclick="setFilter('pay_tranche', this)">📜 Транш</button>
+          <button class="chip" onclick="setFilter('pay_matcap', this)">👨‍👩‍👧 Маткапитал</button>
+          <button class="chip" onclick="setFilter('pay_cash', this)">💵 Наличные</button>
+          <button class="chip" onclick="setFilter('lead', this)">Новый лид</button>
+          <button class="chip" onclick="setFilter('in_progress', this)">В работе</button>
+          <button class="chip" onclick="setFilter('shows', this)">Показы</button>
+          <button class="chip" onclick="setFilter('negotiations', this)">Переговоры</button>
+          <button class="chip" onclick="setFilter('deal', this)">Сделка</button>
+          <button class="chip" onclick="setFilter('purchased', this)">Уже купили</button>
+          <button class="chip" onclick="setFilter('no_answer', this)">📵 Не отвечает</button>
+          <button class="chip" onclick="setFilter('not_relevant', this)">❌ Не актуально</button>
         </div>
-        <button class="btn btn-emerald" onclick="recoverAllLocalContacts()">🎉 Восстановить контакты (145)</button>
-        <button class="btn btn-secondary" style="color:#dc2626;" onclick="deleteTestContacts()">🧹 Сбросить тест</button>
       </div>
 
-      <div class="filters-bar" id="filters-container">
-        <div class="filter-chip active" onclick="setFilter('all', this)">Все контакты (А-Я)</div>
-        <div class="filter-chip" onclick="setFilter('pay_no_pv', this)">🚫 Без ПВ</div>
-        <div class="filter-chip" onclick="setFilter('pay_mortgage', this)">🏦 Ипотека</div>
-        <div class="filter-chip" onclick="setFilter('pay_installment', this)">⏳ Рассрочка</div>
-        <div class="filter-chip" onclick="setFilter('pay_tranche', this)">📜 Транш</div>
-        <div class="filter-chip" onclick="setFilter('pay_matcap', this)">👨‍👩‍👧 Маткапитал</div>
-        <div class="filter-chip" onclick="setFilter('pay_cash', this)">💵 Наличные</div>
-        <div class="filter-chip" onclick="setFilter('lead', this)">Новый лид</div>
-        <div class="filter-chip" onclick="setFilter('in_progress', this)">В работе</div>
-        <div class="filter-chip" onclick="setFilter('viewing', this)">Показы</div>
-        <div class="filter-chip" onclick="setFilter('negotiation', this)">Переговоры</div>
-        <div class="filter-chip" onclick="setFilter('deal', this)">Сделка</div>
-        <div class="filter-chip" onclick="setFilter('purchased', this)">Уже купили</div>
-        <div class="filter-chip" onclick="setFilter('no_answer', this)">📵 Не отвечает</div>
-        <div class="filter-chip" onclick="setFilter('not_relevant', this)">❌ Не актуально</div>
-      </div>
-
-      <div class="client-grid" id="clients-container"></div>
+      <div class="cards-grid" id="clients-container"></div>
     </div>
 
-    <!-- TASKS VIEW -->
+    <!-- VIEW 3: TASKS -->
     <div id="view-tasks" style="display:none;">
-      <div class="toolbar">
+      <div style="background:white; border-radius:12px; border:1px solid #e2e8f0; padding:16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a;">📅 Все запланированные задачи и показы</h3>
         <button class="btn btn-primary" onclick="openTaskModal()">+ Создать задачу</button>
-        <select id="task-filter-status" class="form-control" style="width:auto;" onchange="renderAllTasks()">
-          <option value="all">Все задачи</option>
-          <option value="pending" selected>Запланированные</option>
-          <option value="completed">Выполненные</option>
-        </select>
       </div>
-      <div id="tasks-full-list"></div>
+      <div id="all-tasks-list"></div>
     </div>
 
-    <!-- PIPELINE / VORONKA VIEW -->
+    <!-- VIEW 4: KANBAN -->
     <div id="view-kanban" style="display:none;">
-      <div class="kanban-grid" id="kanban-container"></div>
+      <div class="kanban-board" id="kanban-container"></div>
     </div>
-
   </div>
 
-  <!-- Client Add/Edit Modal -->
-  <div class="modal-overlay" id="client-modal">
-    <div class="modal-card">
+  <div class="quick-add-bar">
+    <button class="fab" onclick="openClientModal()" title="Добавить нового клиента">+</button>
+  </div>
+
+  <!-- MODAL 1: ADD/EDIT CLIENT -->
+  <div class="modal-backdrop" id="client-modal">
+    <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title" id="client-modal-title">Добавить клиента</div>
-        <button class="close-btn" onclick="closeModals()">✕</button>
+        <div class="modal-title" id="client-modal-title">Новый клиент</div>
+        <button class="close-btn" onclick="closeModals()">×</button>
       </div>
       <form id="client-form" onsubmit="saveClient(event)">
-        <input type="hidden" id="edit-client-id">
+        <input type="hidden" id="client-id">
+        
         <div class="form-group">
           <label class="form-label">ФИО / Имя клиента *</label>
-          <input type="text" id="client-name" class="form-control" placeholder="Иванова Анна" required>
+          <input type="text" id="client-name" class="form-control" placeholder="например: Юлия Соколова (Хабаровск)" required>
         </div>
-        <div class="form-group">
-          <label class="form-label">Телефон *</label>
-          <input type="tel" id="client-phone" class="form-control" placeholder="+7 (911) 234-56-78" required>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="form-group">
-            <label class="form-label">Роль</label>
+            <label class="form-label">Телефон *</label>
+            <input type="text" id="client-phone" class="form-control" placeholder="8 (999) 000-00-00" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Роль *</label>
             <select id="client-type" class="form-control">
               <option value="buyer">Покупатель</option>
               <option value="seller">Продавец</option>
             </select>
           </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="form-group">
-            <label class="form-label">Статус воронки</label>
+            <label class="form-label">Этап воронки</label>
             <select id="client-status" class="form-control">
               <option value="lead">Новый лид</option>
               <option value="in_progress">В работе</option>
-              <option value="viewing">Показы</option>
-              <option value="negotiation">Переговоры</option>
+              <option value="shows">Показы</option>
+              <option value="negotiations">Переговоры</option>
               <option value="deal">Сделка</option>
               <option value="purchased">Уже купили</option>
               <option value="no_answer">📵 Не отвечает</option>
               <option value="not_relevant">❌ Не актуально</option>
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label">Приоритет лида</label>
+            <select id="client-urgency" class="form-control">
+              <option value="normal">⚪ Обычный</option>
+              <option value="hot">🔥 Горячий</option>
+              <option value="warm">⚡ Тёплый</option>
+            </select>
+          </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
           <div class="form-group">
-            <label class="form-label">Бюджет (₽)</label>
-            <input type="text" id="client-budget" class="form-control" placeholder="10 000 000">
+            <label class="form-label">Бюджет</label>
+            <input type="text" id="client-budget" class="form-control" placeholder="10 млн">
           </div>
           <div class="form-group">
-            <label class="form-label">ПВ (₽)</label>
-            <input type="text" id="client-initial-payment" class="form-control" placeholder="2 000 000">
+            <label class="form-label">Первоначальный взнос (ПВ)</label>
+            <input type="text" id="client-initialPayment" class="form-control" placeholder="2 млн">
           </div>
           <div class="form-group">
-            <label class="form-label">Платеж/мес (₽)</label>
-            <input type="text" id="client-monthly-payment" class="form-control" placeholder="50 000">
+            <label class="form-label">Ежемесячный платёж</label>
+            <input type="text" id="client-monthlyPayment" class="form-control" placeholder="50 000">
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Запрос по недвижимости / Объекту</label>
-          <input type="text" id="client-property" class="form-control" placeholder="ЖК Аурум, 2к квартира">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Условия покупки / Быстрые теги</label>
-          <input type="text" id="client-payment-terms" class="form-control" placeholder="Ипотека 5.4%, Рассрочка" oninput="syncPaymentChipsFromInput()">
-          <div class="chip-selector" id="payment-chips">
-            <div class="chip-opt" onclick="togglePaymentChip('💵 Наличные')">💵 Наличные</div>
-            <div class="chip-opt" onclick="togglePaymentChip('🏦 Ипотека')">🏦 Ипотека</div>
-            <div class="chip-opt" onclick="togglePaymentChip('🚫 Без ПВ')">🚫 Без ПВ</div>
-            <div class="chip-opt" onclick="togglePaymentChip('👨‍👩‍👧 Маткапитал')">👨‍👩‍👧 Маткапитал</div>
-            <div class="chip-opt" onclick="togglePaymentChip('📜 Субсидия')">📜 Субсидия</div>
-            <div class="chip-opt" onclick="togglePaymentChip('⏳ Рассрочка')">⏳ Рассрочка</div>
-            <div class="chip-opt" onclick="togglePaymentChip('📜 Транш')">📜 Транш</div>
+          <label class="form-label">Условия оплаты (быстрые теги)</label>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+            <button type="button" class="chip" onclick="togglePaymentChip('🚫 Без ПВ')">🚫 Без ПВ</button>
+            <button type="button" class="chip" onclick="togglePaymentChip('🏦 Ипотека')">🏦 Ипотека</button>
+            <button type="button" class="chip" onclick="togglePaymentChip('⏳ Рассрочка')">⏳ Рассрочка</button>
+            <button type="button" class="chip" onclick="togglePaymentChip('📜 Транш')">📜 Транш</button>
+            <button type="button" class="chip" onclick="togglePaymentChip('👨‍👩‍👧 Маткапитал')">👨‍👩‍👧 Маткапитал</button>
+            <button type="button" class="chip" onclick="togglePaymentChip('💵 Наличные')">💵 Наличные</button>
           </div>
+          <input type="text" id="client-paymentTerms" class="form-control" placeholder="Выбранные условия...">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Срочность лида</label>
-          <select id="client-urgency" class="form-control">
-            <option value="normal">Обычная</option>
-            <option value="urgent">🔥 Срочно</option>
-            <option value="month">⚡ До месяца</option>
-            <option value="future">🧊 На будущее</option>
-          </select>
+          <label class="form-label">Запрос по объекту / Локация</label>
+          <input type="text" id="client-property" class="form-control" placeholder="2к квартира, Приморский район">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Примечания / Хэштеги</label>
-          <textarea id="client-notes" class="form-control" rows="2" placeholder="Заметки, предпочтения, #Аурум..."></textarea>
+          <label class="form-label">Теги (через пробел)</label>
+          <input type="text" id="client-tags" class="form-control" placeholder="#Аурум #Имена">
         </div>
 
-        <div style="display:flex; justify-content:space-between; gap:8px; margin-top:12px;">
-          <button type="button" class="btn btn-emerald" onclick="openTaskModalFromClientForm()">📅 + Назначить задачу</button>
-          <div style="display:flex; gap:6px;">
+        <div class="form-group">
+          <label class="form-label">Примечания и комментарии агента</label>
+          <textarea id="client-notes" class="form-control" rows="3" placeholder="Важные детали работы с клиентом..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+          <button type="button" class="btn btn-secondary" onclick="openTaskModalFromClientForm()">📅 + Назначить задачу / показ</button>
+          <div style="display:flex; gap:8px;">
             <button type="button" class="btn btn-secondary" onclick="closeModals()">Отмена</button>
             <button type="submit" class="btn btn-primary">Сохранить</button>
           </div>
@@ -325,59 +298,66 @@
     </div>
   </div>
 
-  <!-- Task Add/Edit Modal -->
-  <div class="modal-overlay" id="task-modal">
-    <div class="modal-card">
+  <!-- MODAL 2: DETAIL CLIENT PROFILE -->
+  <div class="modal-backdrop" id="detail-modal">
+    <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title" id="task-modal-title">Создать задачу</div>
-        <button class="close-btn" onclick="closeModals()">✕</button>
+        <div class="modal-title" id="detail-client-name">Профиль клиента</div>
+        <button class="close-btn" onclick="closeModals()">×</button>
+      </div>
+      <div id="detail-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ADD/EDIT TASK -->
+  <div class="modal-backdrop" id="task-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="task-modal-title">Новая задача</div>
+        <button class="close-btn" onclick="closeModals()">×</button>
       </div>
       <form id="task-form" onsubmit="saveTask(event)">
-        <input type="hidden" id="edit-task-id">
+        <input type="hidden" id="task-id">
+        
         <div class="form-group">
-          <label class="form-label">Привязать к клиенту</label>
-          <select id="task-client-id" class="form-control">
-            <option value="">-- Без привязки --</option>
-          </select>
+          <label class="form-label">Клиент</label>
+          <select id="task-client-id" class="form-control"></select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Название задачи / Встречи *</label>
-          <input type="text" id="task-title" class="form-control" placeholder="Показ ЖК Ultra City" required>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="form-group">
-            <label class="form-label">Тип мероприятия</label>
+            <label class="form-label">Тип события *</label>
             <select id="task-type" class="form-control">
+              <option value="show">👀 Показ объекта</option>
               <option value="call">📞 Звонок / Сообщение</option>
-              <option value="viewing">👁 Показ</option>
               <option value="meeting">🤝 Встреча</option>
-              <option value="document">📜 Документы</option>
+              <option value="docs">📄 Документы / Ипотека</option>
               <option value="other">📌 Другое</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Дата</label>
-            <input type="date" id="task-date" class="form-control" required>
+            <label class="form-label">Название задачи *</label>
+            <input type="text" id="task-title" class="form-control" placeholder="например: Показ 2к на Заречной" required>
           </div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Дата *</label>
+            <input type="date" id="task-date" class="form-control" required>
+          </div>
           <div class="form-group">
             <label class="form-label">Время</label>
             <input type="time" id="task-time" class="form-control" value="12:00">
           </div>
-          <div class="form-group">
-            <label class="form-label">Статус</label>
-            <select id="task-status" class="form-control">
-              <option value="pending">Запланировано</option>
-              <option value="completed">Выполнено</option>
-            </select>
-          </div>
         </div>
+
         <div class="form-group">
-          <label class="form-label">Детали / Примечания</label>
-          <textarea id="task-notes" class="form-control" rows="2" placeholder="Забрать ключи, адрес..."></textarea>
+          <label class="form-label">Заметки к задаче</label>
+          <input type="text" id="task-notes" class="form-control" placeholder="Адрес, особенности, что взять с собой...">
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
           <button type="button" class="btn btn-secondary" onclick="closeModals()">Отмена</button>
           <button type="submit" class="btn btn-primary">Сохранить задачу</button>
         </div>
@@ -385,56 +365,47 @@
     </div>
   </div>
 
-  <!-- Detail Profile Modal -->
-  <div class="modal-overlay" id="detail-modal">
-    <div class="modal-card">
+  <!-- MODAL 4: IMPORT VCARD / TEXT -->
+  <div class="modal-backdrop" id="import-modal">
+    <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title" id="detail-client-name">Профиль клиента</div>
-        <button class="close-btn" onclick="closeModals()">✕</button>
+        <div class="modal-title">Импорт контактов</div>
+        <button class="close-btn" onclick="closeModals()">×</button>
       </div>
-      <div id="detail-modal-body"></div>
-    </div>
-  </div>
-
-  <!-- Import vCard Modal -->
-  <div class="modal-overlay" id="import-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">Импорт контактов vCard / Текст</div>
-        <button class="close-btn" onclick="closeModals()">✕</button>
-      </div>
+      
       <div class="form-group">
-        <label class="form-label">Выберите файл vCard (.vcf) из телефонной книги</label>
-        <input type="file" id="vcf-file-input" class="form-control" accept=".vcf" onchange="handleVcfUpload(event)">
+        <label class="form-label">1. Загрузка файла vCard (.vcf из телефона)</label>
+        <input type="file" id="vcf-file-input" accept=".vcf" class="form-control" onchange="handleVcfUpload(event)">
       </div>
-      <div class="form-group" style="margin-top:12px;">
-        <label class="form-label">Или вставьте список контактов текстом (Имя - Телефон)</label>
-        <textarea id="text-import-input" class="form-control" rows="4" placeholder="Иванова Анна +79112345678&#10;Петров Дмитрий +79219876543"></textarea>
+
+      <hr style="margin: 16px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+      <div class="form-group">
+        <label class="form-label">2. Вставка списка контактов текстом</label>
+        <textarea id="import-text-input" class="form-control" rows="5" placeholder="Иван Иванов +79991112233&#10;Анна Смирнова 89218887766"></textarea>
       </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
-        <button class="btn btn-secondary" onclick="closeModals()">Отмена</button>
-        <button class="btn btn-primary" onclick="handleTextImport()">Импортировать текст</button>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModals()">Отмена</button>
+        <button type="button" class="btn btn-primary" onclick="handleTextImport()">Импортировать список</button>
       </div>
     </div>
   </div>
 
   <script>
+    const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
+
     // Force purge old legacy localStorage keys to fix 176 contacts bug
-    ['realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_cloud_v2', 'realty_crm_clients', 'crm_clients', 'clients', 'realty_crm_clients_master_145'].forEach(k => {
+    ['realty_crm_clients_v1', 'realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_v4', 'realty_crm_clients_cloud_v2', 'realty_crm_clients_master_145', 'realty_crm_clients_master_145_v2', 'realty_crm_clients_master_145_v3', 'realty_crm_clients_master_145_v4', 'crm_clients', 'clients', 'cloud_v2', 'cloud'].forEach(k => {
       try { localStorage.removeItem(k); } catch(e) {}
     });
-
-    const STORAGE_KEYS = [
-      'realty_crm_clients_master_145_v3'
-    ];
-
-    const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
+    const STORAGE_KEYS = ['realty_crm_clients_master_145_v5'];
 
     const STATUS_MAP = {
       lead: 'Новый лид',
       in_progress: 'В работе',
-      viewing: 'Показы',
-      negotiation: 'Переговоры',
+      shows: 'Показы',
+      negotiations: 'Переговоры',
       deal: 'Сделка',
       purchased: 'Уже купили',
       no_answer: '📵 Не отвечает',
@@ -442,24 +413,22 @@
     };
 
     const URGENCY_MAP = {
-      urgent: '<span class="urgency-badge urgency-urgent">🔥 Срочно</span>',
-      month: '<span class="urgency-badge urgency-month">⚡ До месяца</span>',
-      future: '<span class="urgency-badge urgency-future">🧊 На будущее</span>',
+      hot: '🔥',
+      warm: '⚡',
       normal: ''
     };
 
     const TASK_TYPE_ICONS = {
+      show: '👀',
       call: '📞',
-      viewing: '👁',
       meeting: '🤝',
-      document: '📜',
+      docs: '📄',
       other: '📌'
     };
 
-    // Hardcoded Master Database Fallback (Strictly 145 real contacts)
-    const INITIAL_CLIENTS = [{"id":"cli-17861073988590.08718532162707537","name":"Татьяна Чобану","phone":"8 (911) 811-63-35","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.024877385908665506","name":"Ирина Чебеляева","phone":"8 (906) 643-37-26","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7788414401878036","name":"Анна Чадова","phone":"8 (927) 524-85-76","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.4140061989441113","name":"Елена Чабыкина","phone":"+7 (937) 558-80-86","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7937517614059083","name":"Юрий Толмачев","phone":"8 (990) 101-11-58","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2695611334329814","name":"Али Султанов","phone":"8 (931) 588-04-08","type":"buyer","status":"in_progress","budget":"9 000 000","property":"Север города","notes":"Нужна 2к на севере города либо сданное либо ближайшие сроки. Предложенные варианты не устроили, будет смотреть вторичку. Предложила наши услуги. Но так ничего и не ответил"},{"id":"cli-17861073988590.5284168051783354","name":"Юлия Соколова (Хабаровск)","phone":"8 (914) 154-22-69","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5976527581691238","name":"Ксения Рассомахина","phone":"8 (985) 465-54-74","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.15814541992928507","name":"Ольга Пульканова","phone":"8 (983) 565-54-48","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8711311097951557","name":"Марина Потехина","phone":"8 (982) 638-53-04","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.18785633887010467","name":"Юлия (Имена)","phone":"8 (981) 967-30-62","type":"buyer","status":"lead","tags":"#ЮВ #Имена"},{"id":"cli-17861073988590.4124037593976378","name":"Юлия (ЖК Имена)","phone":"8 (923) 568-54-57","type":"buyer","status":"lead","tags":"#ЮВ #Имена"},{"id":"cli-17861073988590.8931298485292415","name":"Эльвина","phone":"8 (977) 009-53-38","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5222046830504508","name":"Хурсид","phone":"8 (911) 937-99-49","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.47402094218683526","name":"Тимур","phone":"89118998080","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8844883447101889","name":"Татьяна2","phone":"8 (903) 713-00-32","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.18055694709249767","name":"Татьяна","phone":"+7 (909) 070-45-05","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8407421820462002","name":"Татьяна (Северный Ветер)","phone":"8 (905) 418-43-21","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.6277258385805574","name":"Татьяна (Аурум 5,4%)","phone":"8 (931) 210-91-29","type":"buyer","status":"lead","paymentTerms":"🏦 Ипотека","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.009581977712399238","name":"Татьяна (Астра)","phone":"8 (921) 384-93-38","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9669670699292853","name":"Татьяна (30.06.26)","phone":"8 (908) 896-08-20","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5898748386129528","name":"Татьяна (25.05.26)","phone":"8 (905) 830-25-52","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.07119294970635397","name":"Татьяна (12.07.26)","phone":"8 (914) 760-34-88","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9231439221235165","name":"Татьяна (11.07.26)","phone":"8 (921) 379-48-07","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8732158866162351","name":"Татьяна (10.07.26)","phone":"8 (931) 008-99-98","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.28822699863486007","name":"Таскира","phone":"8 (968) 184-15-89","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7634426500806497","name":"Тамара","phone":"8 (960) 867-83-05","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.07593649987823521","name":"Сергей","phone":"8 (931) 306-06-07","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.41908353841100344","name":"Светлана (транш.)","phone":"8 (905) 415-05-39","type":"buyer","status":"lead","paymentTerms":"📜 Транш, 🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.052697850849312574","name":"Светлана (рассрочка)","phone":"8 (914) 383-27-82","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":"#ЮВ"},{"id":"cli-17861073988590.6976211822769493","name":"Светлана (Лисино)","phone":"8 (987) 666-96-54","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8384260655452296","name":"Светлана (25.07.26)","phone":"8 (928) 039-18-88","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8164098694086554","name":"Светлана (07.07.26)","phone":"8 (905) 267-62-35","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.963499426915152","name":"Саида","phone":"8 (988) 226-59-40","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.15049580436856722","name":"Роман","phone":"8 (911) 243-29-90","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.10654067341235303","name":"Рифат","phone":"8 (951) 060-48-96","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7229562768541249","name":"Рианна","phone":"+998 91-314-22-55","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.28821946059103986","name":"Рамазан","phone":"8 (903) 423-26-73","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.31295807490059535","name":"Полина","phone":"8 (921) 938-18-55","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.24584487661274533","name":"Павел","phone":"8 (911) 950-54-52","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8761271167909062","name":"Ольга (Ассамблея)","phone":"8 (953) 103-42-01","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.15286435773199858","name":"Ольга (10.06.26)","phone":"8 (914) 965-81-80","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.6725221976077382","name":"Ольга (02.07.26)","phone":"8 (960) 676-77-56","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.3117498305018671","name":"Олеся","phone":"8 (928) 251-44-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7225219958744047","name":"Оксана (22.07.26)","phone":"8 (911) 243-55-25","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5401344427506992","name":"Нина","phone":"+995 555 744 454","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8407421370258079","name":"Наталья (Аурум)","phone":"8 (963) 325-88-18","type":"buyer","status":"lead","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.8123281056581977","name":"Наталья (20.07.26)","phone":"8 (981) 201-25-05","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9632360555620959","name":"Наталья (14.07.26)","phone":"8 (909) 666-37-33","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7303038487723706","name":"Надежда (Новосибирск)","phone":"+34 673 726 102","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9610214811802921","name":"Мурат","phone":"8 (928) 591-68-78","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2319011746200236","name":"Михаил (Персп лок)","phone":"8 (931) 322-67-95","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.35467006857187127","name":"Мария","phone":"8 (922) 227-57-07","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7226065507428489","name":"Мария (персп лок)","phone":"8 (950) 125-56-18","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.4180424564264627","name":"Марина","phone":"8 (952) 277-90-13","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.3477154252636881","name":"Марина (рассрочка)","phone":"8 (978) 791-67-39","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":"#ЮВ"},{"id":"cli-17861073988590.3340576395353528","name":"Марго ?","phone":"8 (999) 202-88-00","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.39521197475355157","name":"Мадина","phone":"8 (928) 147-16-66","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.04618776092040997","name":"Мадина","phone":"8 (928) 380-81-69","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2764953931652399","name":"Людмила (транш.ип.)","phone":"8 (906) 269-11-14","type":"buyer","status":"lead","paymentTerms":"📜 Транш, 🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.8710217036666838","name":"Лидия","phone":"+372 5563 9906","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.4851225565574384","name":"Леонид","phone":"8 (911) 296-12-88","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.6970744648753267","name":"Лариса (Аурум)","phone":"8 (921) 942-87-54","type":"buyer","status":"lead","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.5401032338162235","name":"Ксения","phone":"8 (921) 980-00-61","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8441113063852026","name":"Кристина","phone":"8 (911) 714-38-08","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2036660144131102","name":"Кристина","phone":"8 (921) 880-99-96","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5401344427506992","name":"Кирилл","phone":"8 (931) 366-07-28","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2319011746200236","name":"Карина","phone":"8 (981) 120-14-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9632360555620959","name":"Ихлас","phone":"8 (911) 021-99-69","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8123281056581977","name":"Ирина","phone":"8 (921) 321-44-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8407421370258079","name":"Ирина (транш.ип.)","phone":"8 (921) 900-11-22","type":"buyer","status":"lead","paymentTerms":"📜 Транш, 🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.5401344427506992","name":"Ирина (транш.)","phone":"8 (921) 777-33-44","type":"buyer","status":"lead","paymentTerms":"📜 Транш, 🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.7225219958744047","name":"Ирина (19.07.26)","phone":"8 (911) 888-55-66","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.3117498305018671","name":"Инна","phone":"8 (921) 444-22-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.6725221976077382","name":"Замина","phone":"8 (921) 111-99-88","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.15286435773199858","name":"Елизавета2","phone":"8 (921) 333-22-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8761271167909062","name":"Елизавета","phone":"8 (921) 666-44-22","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.24584487661274533","name":"Елена","phone":"8 (921) 555-33-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.31295807490059535","name":"Елена (персп локации)","phone":"8 (921) 888-11-22","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.28821946059103986","name":"Елена (М36)","phone":"8 (921) 999-44-33","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7229562768541249","name":"Екатерина","phone":"8 (921) 222-11-44","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.10654067341235303","name":"Екатерина (транш.)","phone":"8 (921) 777-66-55","type":"buyer","status":"lead","paymentTerms":"📜 Транш, 🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.15049580436856722","name":"Екатерина (рассрочка)","phone":"8 (921) 444-11-99","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":"#ЮВ"},{"id":"cli-17861073988590.963499426915152","name":"Екатерина (ЖК Имена)","phone":"8 (921) 888-33-11","type":"buyer","status":"lead","tags":"#ЮВ #Имена"},{"id":"cli-17861073988590.8164098694086554","name":"Екатерина (Аурум)","phone":"8 (921) 111-22-33","type":"buyer","status":"lead","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.8384260655452296","name":"Екатерина (19.07.26)","phone":"8 (921) 555-66-77","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.6976211822769493","name":"Екатерина (16.07.26)","phone":"8 (921) 999-11-22","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.052697850849312574","name":"Егор","phone":"8 (921) 333-88-99","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.41908353841100344","name":"Евгения","phone":"8 (921) 777-44-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.07593649987823521","name":"Евгения (ипотека 5%)","phone":"8 (921) 222-33-44","type":"buyer","status":"lead","paymentTerms":"🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.7634426500806497","name":"Евгения (23.07.26)","phone":"8 (921) 111-55-66","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.28822699863486007","name":"Евгения (20.07.26)","phone":"8 (921) 888-99-00","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8732158866162351","name":"Евгений","phone":"+7 (981) 688-88-22","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9231439221235165","name":"Дмитрий (25.07.26)","phone":"8 (917) 820-83-43","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.07119294970635397","name":"Диана","phone":"8 (911) 940-35-59","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5898748386129528","name":"Диана Железняк","phone":"+7 (917) 462-34-71","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.9669670699292853","name":"Джуд","phone":"8 (905) 228-12-36","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.009581977712399238","name":"Денис (Новоселье)","phone":"8 (961) 440-06-22","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.6277258385805574","name":"Дарья","phone":"8 (914) 784-78-10","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8407421820462002","name":"Дарья Медведева","phone":"8 (993) 972-09-77","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.18055694709249767","name":"Даниил","phone":"8 (981) 682-55-99","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8844883447101889","name":"Галина (Аурум)","phone":"8 (904) 553-33-99","type":"buyer","status":"lead","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.47402094218683526","name":"Газимагомед","phone":"8 (963) 794-44-76","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5222046830504508","name":"Владимир (Индия)","phone":"8 (996) 773-20-88","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8931298485292415","name":"Влад","phone":"8 (953) 446-31-41","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.4124037593976378","name":"Виктория","phone":"8 (914) 594-07-78","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.18785633887010467","name":"Виктория (персп лок)","phone":"8 (919) 179-01-91","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.8711311097951557","name":"Вадим Матвеев","phone":"+79991303949","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.15814541992928507","name":"Бэлла","phone":"8 (921) 382-11-23","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5976527581691238","name":"Артур","phone":"8 (921) 774-41-44","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5284168051783354","name":"Анна Fox","phone":"8 (921) 366-28-86","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2695611334329814","name":"Анна","phone":"8 (914) 595-11-99","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.7937517614059083","name":"Анна (Мурино)","phone":"8 (900) 623-55-94","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.4140061989441113","name":"Анна (Аурум)","phone":"8 (911) 158-81-82","type":"buyer","status":"lead","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.7788414401878036","name":"Анна (26.07.26)","phone":"8 (900) 096-32-11","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.024877385908665506","name":"Анна (12.07.26)","phone":"8 (924) 421-96-03","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.08718532162707537","name":"Анна (08.07.26)","phone":"8 (951) 664-66-94","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.1111111111111111","name":"Ани Саргсян","phone":"8 (965) 368-87-71","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.2222222222222222","name":"Анжела (Индия)","phone":"8 (921) 384-43-32","type":"buyer","status":"purchased","tags":"#ЮВ"},{"id":"cli-17861073988590.3333333333333333","name":"Андрей","phone":"8 (964) 342-82-54","type":"buyer","status":"in_progress","property":"1к","notes":"Интересует 1к квартира под инвестиции. Пытаюсь продать Аурум. Рассматривали разные локации. Но сейчас ждёт денег от какого то юр лица. Связь раз в месяц","tags":"#Аурум #Инвестиции"},{"id":"cli-17861073988590.4444444444444444","name":"Андрей (отец Даниила)","phone":"+7 (978) 126-03-26","type":"buyer","status":"lead","tags":"#ЮВ"},{"id":"cli-17861073988590.5555555555555555","name":"Ангелина","phone":"8 (987) 331-43-18","type":"buyer","status":"not_relevant","notes":"Хотела готовую подборку. Индивидуальная подборка не нужна"},{"id":"cli-17861073988590.6666666666666666","name":"Анастасия3","phone":"8 (909) 322-33-11","type":"buyer","status":"no_answer","notes":"Так и не получилось связаться"},{"id":"cli-17861073988590.7777777777777777","name":"Анастасия","phone":"8 (952) 754-46-87","type":"buyer","status":"no_answer","notes":"Рассматривали варианты под семейку. Но потом сказали, что решили деньги пустить в другое русло. На следующие сообщения уже не отвечают"},{"id":"cli-17861073988590.8888888888888888","name":"Анастасия","phone":"8 (981) 705-90-07","type":"buyer","status":"lead"},{"id":"cli-17861073988590.9999999999999999","name":"Анастасия (Мурманск)","phone":"8 (911) 806-77-53","type":"buyer","status":"purchased","property":"Мурманск","notes":"Рассматривали квартиры в разных локациях, но склонялись к Кудрово 2. Потом перестала выходить на связь, оказывается вышли на сделку с другим агентом, с которым общался муж"},{"id":"cli-17861073988590.1234567890123456","name":"Анастасия (МК в ПВ)","phone":"8 (977) 949-63-12","type":"buyer","status":"purchased","paymentTerms":"👨‍👩‍👧 Маткапитал","notes":"Нужна студия по минимальной цене под инвестиции (сдача в аренду). Своих мат кап в ПВ и немного могут добавить. Сами в Москве живут, купили квартиру от Самолета. В итоге остановились на Самолете ЖК Квартал Лаголово, покупают напрямую у застройщика","tags":"#Инвестиции"},{"id":"cli-17861073988590.2345678901234567","name":"Анастасия (15.07.26)","phone":"+90 (553) 218 46 36","type":"buyer","status":"in_progress","notes":"Живёт в Турции, хочет вернуться. Сейчас ПВ только 1млн, надо продать квартиру в Свердловском г.п. Обсудили все условия продажи и покупки, все устроило. Понравился ЖК Сэтл Ривьера. Когда запускать продажу пока не знает, после 22 августа будет известно уедет или нет на несколько месяцев и соответственно сможет прилететь на сделку или нет"},{"id":"cli-17861073988590.3456789012345678","name":"Анастасия (09.07.26)","phone":"8 (911) 743-89-77","type":"buyer","status":"no_answer","notes":"Под семейку не подходит. Подробности по запросу не написала. Написала, что с ответом вернётся позже, но так и не ответила"},{"id":"cli-17861073988590.4567890123456789","name":"Аля","phone":"8 (981) 830-61-22","type":"buyer","status":"in_progress","property":"Студия","notes":"Нужна студия для инвестиций, чтобы потом перепродать. Платеж до 30к. Сначала не давала ФИО, но потом разговорила ее и вошла в доверие. Из подборки остановились на двух вариантах - Имена и Борский. Больше ей вроде Борский зашёл, я ее на Имена. Оба варианта подходят, но нужно продать свою переуступку (договор с ПН). Если продадут, то с нами купят. Нет, значит оставят ту, там небольшие платежи.\nПока их переуступка не продается","tags":"#Имена #Инвестиции"},{"id":"cli-17861073988590.5678901234567890","name":"Альбина","phone":"8 (919) 421-16-03","type":"buyer","status":"purchased","notes":"Альбина из Северной Осетии, хочет 1к квартиру для инвестиций, ПВ 600т.р. Но до этого она уже общалась с другим агентом и он ей присылал расчеты, которые не устроили. Я ей сделала более широкую подборку, но по обратной связи так и не получилось с ней связаться.\nПо итогу она ответила, что купили квартиру во Владикавказе","tags":"#Инвестиции"},{"id":"cli-17861073988590.6789012345678901","name":"Алиса","phone":"8 (951) 372-64-59","type":"buyer","status":"no_answer","notes":"Делала подборку. Но она пропала, на связь перестала выходить. Время от времени спрашивала об актуальности - нет ответа"},{"id":"cli-17861073988590.7890123456789012","name":"Алина","phone":"8 (981) 887-61-35","type":"buyer","status":"not_relevant","notes":"Интересовалась вариантом в рилсе. Далее сказала, что у нее уже есть агент"},{"id":"cli-17861073988590.8901234567890123","name":"Алина (город-спутник Южный)","phone":"8 (951) 764-67-09","type":"buyer","status":"not_relevant","property":"1к","notes":"ПВ 1-5 млн, платеж комфортнее до 57 и.р. Нужна 1к желательно в сданном доме. Сделала подборку.\nДолгое время не отвечала по ОС. Потом ответила, что приостановили поиск"},{"id":"cli-17861073988590.9012345678901234","name":"Александр","phone":"+7 (982) 729-53-00","type":"buyer","status":"no_answer","notes":"Все пытались с ним созвониться. Но так я до него и не дозвонилась"},{"id":"cli-17861073988590.0123456789012345","name":"Айзанат","phone":"8 (911) 970-61-90","type":"buyer","status":"no_answer","notes":"Совсем не ответила ни на звонок, ни на сообщение"},{"id":"cli-17861073988590.1234567891234567","name":"Адик","phone":"8 (960) 408-34-25","type":"buyer","status":"in_progress","property":"2к","notes":"Подходит под семейную ипотеку. Хочет 2к квартиру с ПВ 2-3млн. ЕП комфортен до 100т.р. Рассматривает синюю ветку в черновой отделке. Дети учатся в мед колледже Павлова. Он отец пятерых детей. Сам на СВО сейчас. Спрашивает периодически по вариантам в статусах"},{"id":"cli-17861073988590.2345678902345678","name":"Лачин (Тайм сквер)","phone":"8 (900) 639-76-11","type":"buyer","status":"not_relevant","property":"ЖК Тайм сквер","notes":"Гражданка Туркменистана. Учится в СПб. Хочет купить квартиру в ипотеку. Но на данный момент нет работы, только учится"},{"id":"cli-17861073988590.3456789013456789","name":"Андрей (аурум)","phone":"8 (999) 231-45-70","type":"buyer","status":"lead","property":"ЖК аурум","tags":"#Аурум #ЮВ"},{"id":"cli-17861073988590.4567890124567890","name":"Ирина (Аурум Студия)","phone":"8 (991) 083-43-98","type":"buyer","status":"lead","property":"ЖК Аурум Студия","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.5678901235678901","name":"Юлия (Аурум 2,2)","phone":"8 (931) 311-79-13","type":"buyer","status":"lead","property":"ЖК Аурум 2,2","tags":"#ЮВ #Аурум"},{"id":"cli-17861073988590.6789012346789012","name":"Алина (2,2%)","phone":"8 (993) 489-80-83","type":"buyer","status":"no_answer","paymentTerms":"🏦 Ипотека","notes":"Рассматривали 1к квартиру в рассрочку, так как в июле рожать и можно перейти на СИ. Сделала подборку, посчитали варианты. Понравился Пулково Лейк. Но потом написала, что сильно заболела и пропала.\n8 июля написала ей, сообщение прочитала, но не ответила"},{"id":"cli-17861073988590.7890123457890123","name":"Ольга (1%)","phone":"8 (999) 041-22-87","type":"buyer","status":"lead","paymentTerms":"🏦 Ипотека","tags":"#ЮВ"},{"id":"cli-17861073988590.8901234568901234","name":"Дмитрий Астраханцев (рассрочка)","phone":"8 (931) 343-69-03","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":"#ЮВ"},{"id":"cli-17861010138990.36138167232219687","name":"Анастасия Алазова","phone":"8 (989) 757-73-68","type":"buyer","status":"no_answer","notes":"Так и не вышла на связь"}];
-    const INITIAL_TASKS = [{"id":"t-1786124509776","title":"Показ / Встреча","type":"call","clientId":"cli-17861073988580.8984816527928866","date":"2026-08-10","time":"12:00","notes":"Попробовать связаться","done":false},{"id":"t-1786123619407","title":"Попробовать связаться","type":"call","clientId":"cli-17861073988580.8170827795293745","date":"2026-09-16","time":"12:00","notes":"Попробовать связаться","done":false},{"id":"t-1786123060625","title":"Связь","type":"call","clientId":"cli-17861073988580.44564538967733125","date":"2026-08-24","time":"12:00","notes":"Узнать когда планирует запускать продажу","done":false},{"id":"t-1786120728434","title":"Связь","type":"call","clientId":"cli-17861073988580.5599502638553692","date":"2026-08-10","time":"14:00","notes":"Попробовать связаться","done":false},{"id":"t-1786120351834","title":"Связь","type":"call","clientId":"cli-17861073988580.8325085980013921","date":"2026-09-10","time":"14:00","notes":"Как идет продажа","done":false},{"id":"t-1786115844469","title":"Связаться","type":"call","clientId":"cli-17861073988580.9829709210095662","date":"2026-08-10","time":"14:00","notes":"Попробовать связаться","done":false},{"id":"t-1786111401695","title":"Показ / Встреча с Адик","clientId":"cli-17861103981830.37599031312289444","date":"2026-08-28","time":"14:00","notes":"Узнать не готов ли к покупке","done":false}];
-    const INITIAL_COMMENTS = [{"id":"com-cli-17861073988590.2695611334329814","clientId":"cli-17861073988590.2695611334329814","text":"Нужна 2к на севере города либо сданное либо ближайшие сроки. Предложенные варианты не устроили, будет смотреть вторичку. Предложила наши услуги. Но так ничего и не ответил","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.3333333333333333","clientId":"cli-17861073988590.3333333333333333","text":"Интересует 1к квартира под инвестиции. Пытаюсь продать Аурум. Рассматривали разные локации. Но сейчас ждёт денег от какого то юр лица. Связь раз в месяц","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.5555555555555555","clientId":"cli-17861073988590.5555555555555555","text":"Хотела готовую подборку. Индивидуальная подборка не нужна","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.6666666666666666","clientId":"cli-17861073988590.6666666666666666","text":"Так и не получилось связаться","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.7777777777777777","clientId":"cli-17861073988590.7777777777777777","text":"Рассматривали варианты под семейку. Но потом сказали, что решили деньги пустить в другое русло. На следующие сообщения уже не отвечают","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.9999999999999999","clientId":"cli-17861073988590.9999999999999999","text":"Рассматривали квартиры в разных локациях, но склонялись к Кудрово 2. Потом перестала выходить на связь, оказывается вышли на сделку с другим агентом, с которым общался муж","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.1234567890123456","clientId":"cli-17861073988590.1234567890123456","text":"Нужна студия по минимальной цене под инвестиции (сдача в аренду). Своих мат кап в ПВ и немного могут добавить. Сами в Москве живут, купили квартиру от Самолета. В итоге остановились на Самолете ЖК Квартал Лаголово, покупают напрямую у застройщика","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.2345678901234567","clientId":"cli-17861073988590.2345678901234567","text":"Живёт в Турции, хочет вернуться. Сейчас ПВ только 1млн, надо продать квартиру в Свердловском г.п. Обсудили все условия продажи и покупки, все устроило. Понравился ЖК Сэтл Ривьера. Когда запускать продажу пока не знает, после 22 августа будет известно уедет или нет на несколько месяцев и соответственно сможет прилететь на сделку или нет","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.3456789012345678","clientId":"cli-17861073988590.3456789012345678","text":"Под семейку не подходит. Подробности по запросу не написала. Написала, что с ответом вернётся позже, но так и не ответила","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.4567890123456789","clientId":"cli-17861073988590.4567890123456789","text":"Нужна студия для инвестиций, чтобы потом перепродать. Платеж до 30к. Сначала не давала ФИО, но потом разговорила ее и вошла в доверие. Из подборки остановились на двух вариантах - Имена и Борский. Больше ей вроде Борский зашёл, я ее на Имена. Оба варианта подходят, но нужно продать свою переуступку (договор с ПН). Если продадут, то с нами купят. Нет, значит оставят ту, там небольшие платежи.\nПока их переуступка не продается","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.5678901234567890","clientId":"cli-17861073988590.5678901234567890","text":"Альбина из Северной Осетии, хочет 1к квартиру для инвестиций, ПВ 600т.р. Но до этого она уже общалась с другим агентом и он ей присылал расчеты, которые не устроили. Я ей сделала более широкую подборку, но по обратной связи так и не получилось с ней связаться.\nПо итогу она ответила, что купили квартиру во Владикавказе","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.6789012345678901","clientId":"cli-17861073988590.6789012345678901","text":"Делала подборку. Но она пропала, на связь перестала выходить. Время от времени спрашивала об актуальности - нет ответа","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.7890123456789012","clientId":"cli-17861073988590.7890123457890123","text":"Интересовалась вариантом в рилсе. Далее сказала, что у нее уже есть агент","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.8901234567890123","clientId":"cli-17861073988590.8901234567890123","text":"ПВ 1-5 млн, платеж комфортнее до 57 и.р. Нужна 1к желательно в сданном доме. Сделала подборку.\nДолгое время не отвечала по ОС. Потом ответила, что приостановили поиск","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.9012345678901234","clientId":"cli-17861073988590.9012345678901234","text":"Все пытались с ним созвониться. Но так я до него и не дозвонилась","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.0123456789012345","clientId":"cli-17861073988590.0123456789012345","text":"Совсем не ответила ни на звонок, ни на сообщение","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.1234567891234567","clientId":"cli-17861073988590.1234567891234567","text":"Подходит под семейную ипотеку. Хочет 2к квартиру с ПВ 2-3млн. ЕП комфортен до 100т.р. Рассматривает синюю ветку в черновой отделке. Дети учатся в мед колледже Павлова. Он отец пятерых детей. Сам на СВО сейчас. Спрашивает периодически по вариантам в статусах","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.2345678902345678","clientId":"cli-17861073988590.2345678902345678","text":"Гражданка Туркменистана. Учится в СПб. Хочет купить квартиру в ипотеку. Но на данный момент нет работы, только учится","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-17861073988590.6789012346789012","clientId":"cli-17861073988590.6789012346789012","text":"Рассматривали 1к квартиру в рассрочку, так как в июле рожать и можно перейти на СИ. Сделала подборку, посчитали варианты. Понравился Пулково Лейк. Но потом написала, что сильно заболела и пропала.\n8 июля написала ей, сообщение прочитала, но не ответила","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"},{"id":"com-cli-101","clientId":"cli-17861010138990.36138167232219687","text":"Так и не вышла на связь","createdAt":"2026-08-08T08:00:00.000Z","date":"08.08.2026, 11:00:00","author":"Марина"}];
+    const INITIAL_CLIENTS = [{"id":"cli-17861010139000.28773327571695606","name":"Татьяна Чобану","phone":"8 (911) 811-63-35","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6038526633369862","name":"Ирина Чебеляева","phone":"8 (906) 643-37-26","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.778922979879851","name":"Анна Чадова","phone":"8 (927) 524-85-76","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3408057927030991","name":"Елена Чабыкина","phone":"+7 (937) 558-80-86","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.979655780134809","name":"Юрий Толмачев","phone":"8 (990) 101-11-58","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.38806083701113137","name":"Али Султанов","phone":"8 (931) 588-04-08","type":"buyer","status":"in_progress","budget":"9 000 000","property":"Север города","tags":"","notes":"Нужна 2к на севере города либо сданное либо ближайшие сроки. Предложенные варианты не устроили, будет смотреть вторичку. Предложила наши услуги. Но так ничего и не ответил"},{"id":"cli-17861010139000.8817278710083994","name":"Юлия Соколова (Хабаровск)","phone":"8 (914) 154-22-69","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7830912727916151","name":"Ксения Рассомахина","phone":"8 (985) 465-54-74","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6997245648362377","name":"Ольга Пульканова","phone":"8 (983) 565-54-48","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.18657997383205793","name":"Марина Потехина","phone":"8 (982) 638-53-04","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.05057043479288714","name":"Юлия (Имена)","phone":"8 (981) 967-30-62","type":"buyer","status":"lead","tags":"#Имена"},{"id":"cli-17861010139000.4342623266650606","name":"Юлия (ЖК Имена)","phone":"8 (923) 568-54-57","type":"buyer","status":"lead","tags":"#Имена"},{"id":"cli-17861010139000.007709458273923442","name":"Эльвина","phone":"8 (977) 009-53-38","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6679779173913762","name":"Хурсид","phone":"8 (911) 937-99-49","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3072041433969436","name":"Тимур","phone":"89118998080","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6429184671356264","name":"Татьяна2","phone":"8 (903) 713-00-32","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.006160920140312776","name":"Татьяна","phone":"+7 (909) 070-45-05","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6005391793508674","name":"Татьяна (Северный Ветер)","phone":"8 (905) 418-43-21","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6731196239444299","name":"Татьяна (Аурум 5,4%)","phone":"8 (931) 210-91-29","type":"buyer","status":"lead","paymentTerms":"🏦 Ипотека","tags":"#Аурум"},{"id":"cli-17861010139000.28376128699049474","name":"Татьяна (Астра)","phone":"8 (921) 384-93-38","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6782491296062663","name":"Татьяна (30.06.26)","phone":"8 (908) 896-08-20","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7511378144566301","name":"Татьяна (25.05.26)","phone":"8 (905) 830-25-52","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.36477347834212825","name":"Татьяна (12.07.26)","phone":"8 (914) 760-34-88","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8815419396667588","name":"Татьяна (11.07.26)","phone":"8 (921) 379-48-07","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.5221501586216993","name":"Татьяна (10.07.26)","phone":"8 (931) 008-99-98","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.24561146895675523","name":"Таскира","phone":"8 (968) 184-15-89","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.00525870435580944","name":"Тамара","phone":"8 (960) 867-83-05","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3624011747974263","name":"Сергей","phone":"8 (931) 306-06-07","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.31906437286834144","name":"Светлана (транш.)","phone":"8 (905) 415-05-39","type":"buyer","status":"lead","paymentTerms":"📜 Транш","tags":""},{"id":"cli-17861010139000.03507566980412413","name":"Светлана (рассрочка)","phone":"8 (914) 383-27-82","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":""},{"id":"cli-17861010139000.38516076024069335","name":"Светлана (Лисино)","phone":"8 (987) 666-96-54","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.08331128732403137","name":"Светлана (25.07.26)","phone":"8 (928) 039-18-88","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3182293615838109","name":"Светлана (07.07.26)","phone":"8 (905) 267-62-35","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3064452493570612","name":"Саида","phone":"8 (988) 226-59-40","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9276169750789931","name":"Роман","phone":"8 (911) 243-29-90","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.06303691222877061","name":"Рифат","phone":"8 (951) 060-48-96","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.2602838125766497","name":"Рианна","phone":"+998 91-314-22-55","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.46359375303388983","name":"Рамазан","phone":"8 (903) 423-26-73","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.5538162754681616","name":"Полина","phone":"8 (921) 938-18-55","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.15856356214958323","name":"Павел","phone":"8 (911) 950-54-52","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8176747833092923","name":"Ольга (Ассамблея)","phone":"8 (953) 103-42-01","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3179815088294623","name":"Ольга (10.06.26)","phone":"8 (914) 965-81-80","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8896296460860571","name":"Ольга (02.07.26)","phone":"8 (960) 676-77-56","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.12492658749464836","name":"Олеся","phone":"8 (928) 251-44-11","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6893435167496962","name":"Оксана (22.07.26)","phone":"8 (911) 243-55-25","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7082606957500468","name":"Нина","phone":"+995 555 744 454","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8374179669072229","name":"Наталья (Аурум)","phone":"8 (963) 325-88-18","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.2674257880298426","name":"Наталья (20.07.26)","phone":"8 (981) 201-25-05","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7127484879491124","name":"Наталья (14.07.26)","phone":"8 (909) 666-37-33","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6553336730649488","name":"Надежда (Новосибирск)","phone":"+34 673 726 102","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.97406661976169","name":"Мурат","phone":"8 (928) 591-68-78","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6941154762087072","name":"Михаил (Персп лок)","phone":"8 (931) 322-67-95","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.03139511590864863","name":"Мария","phone":"8 (922) 227-57-07","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.39451467233246595","name":"Мария (персп лок)","phone":"8 (950) 125-56-18","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.0029893665794289426","name":"Марина","phone":"8 (952) 277-90-13","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9175946350870262","name":"Марина (рассрочка)","phone":"8 (978) 791-67-39","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":""},{"id":"cli-17861010139000.8301714839143425","name":"Марго ?","phone":"8 (999) 202-88-00","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.880756261254816","name":"Мадина","phone":"8 (928) 147-16-66","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.46333308197573775","name":"Мадина","phone":"8 (928) 380-81-69","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.3024926594886107","name":"Людмила (транш.ип.)","phone":"8 (906) 269-11-14","type":"buyer","status":"lead","paymentTerms":"📜 Транш","tags":""},{"id":"cli-17861010139000.30349618265425127","name":"Лидия","phone":"+372 5563 9906","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7126909801421525","name":"Леонид","phone":"8 (921) 301-77-07","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8733049117664589","name":"Лариса (Аурум)","phone":"8 (913) 213-99-57","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.8283614871815977","name":"Ксения","phone":"8 (963) 813-42-44","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8680517570417128","name":"Кристина","phone":"8 (920) 212-23-71","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.2933016131550781","name":"Кристина","phone":"8 (977) 397-30-12","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.48974094845974814","name":"Кирилл","phone":"8 (952) 359-64-01","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9048813936825498","name":"Карина","phone":"8 (999) 445-81-54","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.48364638265625093","name":"Ирина (транш.ип.)","phone":"8 (921) 581-22-26","type":"buyer","status":"lead","paymentTerms":"📜 Транш","tags":""},{"id":"cli-17861010139000.1264426550275815","name":"Ирина (транш.)","phone":"8 (910) 902-61-71","type":"buyer","status":"lead","paymentTerms":"📜 Транш","tags":""},{"id":"cli-17861010139000.17700684126781267","name":"Ирина (19.07.26)","phone":"8 (911) 229-79-19","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7301072911270275","name":"Инна","phone":"8 (921) 366-60-31","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.32356191244302685","name":"Зарема","phone":"8 (988) 641-69-90","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.2223945417855071","name":"Замина","phone":"8 (911) 166-51-18","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.0898516104863375","name":"Елена (персп локации)","phone":"8 (911) 977-80-60","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6728036502209121","name":"Елена (М36)","phone":"8 (921) 328-98-38","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.021021200234057697","name":"Екатерина (транш.)","phone":"8 (931) 314-11-20","type":"buyer","status":"lead","paymentTerms":"📜 Транш","tags":""},{"id":"cli-17861010139000.5186256247321528","name":"Екатерина (рассрочка)","phone":"8 (921) 759-42-45","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":""},{"id":"cli-17861010139000.7208154674391699","name":"Екатерина (ЖК Имена)","phone":"8 (921) 560-60-70","type":"buyer","status":"lead","tags":"#Имена"},{"id":"cli-17861010139000.7834571932822188","name":"Екатерина (Аурум)","phone":"8 (909) 584-38-04","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.7937175402011709","name":"Екатерина (19.07.26)","phone":"8 (903) 093-61-71","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.866030999532557","name":"Екатерина (16.07.26)","phone":"8 (904) 639-66-82","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.22851494793616686","name":"Евгения (ипотека 5%)","phone":"8 (911) 296-61-36","type":"buyer","status":"lead","paymentTerms":"🏦 Ипотека","tags":""},{"id":"cli-17861010139000.320498616147414","name":"Евгения (23.07.26)","phone":"8 (911) 745-66-96","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.08819875466826601","name":"Евгения (20.07.26)","phone":"8 (921) 977-17-76","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9169641753177699","name":"Дмитрий (25.07.26)","phone":"8 (962) 685-64-55","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.6729094503795123","name":"Денис (Новоселье)","phone":"8 (921) 845-65-80","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.2589578107936161","name":"Данил","phone":"8 (981) 880-97-88","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.5699479313941427","name":"Гульнара","phone":"8 (981) 843-05-92","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7513364205562722","name":"Галина (Аурум)","phone":"8 (911) 987-95-58","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.8711059998246061","name":"Владимир (Индия)","phone":"8 (911) 739-16-16","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8354890696954203","name":"Виктория (персп лок)","phone":"8 (981) 182-35-18","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8545356856805059","name":"Вадим Матвеев","phone":"+79991303949","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.12481768701007734","name":"Бэлла","phone":"8 (921) 382-11-23","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9207928874034063","name":"Артур","phone":"8 (921) 774-41-44","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9156761913074618","name":"Анна Fox","phone":"8 (921) 366-28-86","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.8936974949013287","name":"Анна","phone":"8 (914) 595-11-99","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.7355383940359159","name":"Анна (Мурино)","phone":"8 (900) 623-55-94","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.834311603390869","name":"Анна (Аурум)","phone":"8 (911) 158-81-82","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.6135906619918378","name":"Анна (26.07.26)","phone":"8 (900) 096-32-11","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.38090153194078136","name":"Анна (12.07.26)","phone":"8 (924) 421-96-03","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.4628141770685231","name":"Анна (08.07.26)","phone":"8 (951) 664-66-94","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.1992171861851607","name":"Ани Саргсян","phone":"8 (965) 368-87-71","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.9043661273277263","name":"Анжела (Индия)","phone":"8 (921) 384-43-32","type":"buyer","status":"purchased","tags":""},{"id":"cli-17861010139000.9787775773794772","name":"Андрей","phone":"8 (964) 342-82-54","type":"buyer","status":"in_progress","property":"1к","tags":"","notes":"Интересует 1к квартира под инвестиции. Пытаюсь продать Аурум. Рассматривали разные локации. Но сейчас ждёт денег от какого то юр лица. Связь раз в месяц"},{"id":"cli-17861010139000.9803823346281053","name":"Андрей (отец Даниила)","phone":"+7 (978) 126-03-26","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.48792069847902575","name":"Ангелина","phone":"8 (987) 331-43-18","type":"buyer","status":"not_relevant","tags":"","notes":"Хотела готовую подборку. Индивидуальная подборка не нужна"},{"id":"cli-17861010139000.3167406535848658","name":"Анастасия3","phone":"8 (909) 322-33-11","type":"buyer","status":"no_answer","tags":""},{"id":"cli-17861010139000.7888404624190042","name":"Анастасия","phone":"8 (952) 754-46-87","type":"buyer","status":"no_answer","tags":"","notes":"Рассматривали варианты под семейку. Но потом сказали, что решили деньги пустить в другое русло. На следующие сообщения уже не отвечают"},{"id":"cli-17861010139000.5078235150721856","name":"Анастасия","phone":"8 (981) 705-90-07","type":"buyer","status":"lead","tags":""},{"id":"cli-17861010139000.4233038779559094","name":"Анастасия (Мурианск)","phone":"8 (911) 806-77-53","type":"buyer","status":"purchased","tags":"","notes":"Рассматривали квартиры в разных локациях, но склонялись к Кудрово 2. Потом перестала выходить на связь, оказывается вышли на сделку с другим агентом, с которым общался муж"},{"id":"cli-17861010139000.8906175166974581","name":"Анастасия (МК в ПВ)","phone":"8 (977) 949-63-12","type":"buyer","status":"purchased","paymentTerms":"👨‍👩‍👧 Маткапитал","tags":"","notes":"Нужна студия по минимальной цене под инвестиции (сдача в аренду). Своих мат кап в ПВ и немного могут добавить. Сами в Москве живут, купили квартиру от Самолета. В итоге остановились на Самолете ЖК Квартал Лаголово, покупают напрямую у застройщика"},{"id":"cli-17861010139000.6132825792436806","name":"Анастасия (15.07.26)","phone":"+90 (553) 218 46 36","type":"buyer","status":"in_progress","tags":"","notes":"Живёт в Турции, хочет вернуться. Сейчас ПВ только 1млн, надо продать квартиру в Свердловском г.п. Обсудили все условия продажи и покупки, все устроило. Понравился ЖК Сэтл Ривьера. Когда запускать продажу пока не знает, после 22 августа будет известно уедет или нет на несколько месяцев и соответственно сможет прилететь на сделку или нет"},{"id":"cli-17861010139000.015786595023340566","name":"Анастасия (09.07.26)","phone":"8 (911) 743-89-77","type":"buyer","status":"no_answer","tags":"","notes":"Под семейку не подходит. Подробности по запросу не написала. Написала, что с ответом вернётся позже, но так и не ответила"},{"id":"cli-17861010139000.39997637366264094","name":"Аля","phone":"8 (981) 830-61-22","type":"buyer","status":"in_progress","property":"Студия","initialPayment":"1 млн","monthlyPayment":"до 30 000","tags":"","notes":"Нужна студия для инвестиций, чтобы потом перепродать. Платеж до 30к. Сначала не давала ФИО, но потом разговорила ее и вошла в доверие. Из подборки остановились на двух вариантах - Имена и Борский. Больше ей вроде Борский зашёл, я ее на Имена. Оба варианта подходят, но нужно продать свою переуступку (договор с ПН). Если продадут, то с нами купят. Нет, значит оставят ту, там небольшие платежи.\nПока их переуступка не продается"},{"id":"cli-17861010139000.014090702063149552","name":"Альбина","phone":"8 (919) 421-16-03","type":"buyer","status":"purchased","tags":"","notes":"Альбина из Северной Осетии, хочет 1к квартиру для инвестиций, ПВ 600т.р. Но до этого она уже общалась с другим агентом и он ей присылал расчеты, которые не устроили. Я ей сделала более широкую подборку, но по обратной связи так и не получилось с ней связаться.\nПо итогу она ответила, что купили квартиру во Владикавказе"},{"id":"cli-17861010139000.020229030214719668","name":"Алиса","phone":"8 (951) 372-64-59","type":"buyer","status":"no_answer","tags":"","notes":"Делала подборку. Но она пропала, на связь перестала выходить. Время от времени спрашивала об актуальности - нет ответа"},{"id":"cli-17861010139000.9769521921030863","name":"Алина","phone":"8 (981) 887-61-35","type":"buyer","status":"not_relevant","tags":"","notes":"Интересовалась вариантом в рилсе. Далее сказала, что у нее уже есть агент"},{"id":"cli-17861010139000.6429644011322132","name":"Алина (город-спутник Южный)","phone":"8 (951) 764-67-09","type":"buyer","status":"not_relevant","property":"1к ","initialPayment":"1-5 млн","monthlyPayment":"до 57 000","tags":"","notes":"ПВ 1-5 млн, платеж комфортнее до 57 и.р. Нужна 1к желательно в сданном доме. Сделала подборку.\nДолгое время не отвечала по ОС. Потом ответила, что приостановили поиск"},{"id":"cli-17861010139000.4820229924157525","name":"Александр","phone":"+7 (982) 729-53-00","type":"buyer","status":"no_answer","tags":"","notes":"Все пытались с ним созвониться. Но так я до него и не дозвонилась"},{"id":"cli-17861010139000.21728332263813677","name":"Айзанат","phone":"8 (911) 970-61-90","type":"buyer","status":"no_answer","tags":"","notes":"Совсем не ответила ни на звонок, ни на сообщение"},{"id":"cli-17861010139000.8919461852785073","name":"Адик","phone":"8 (960) 408-34-25","type":"buyer","status":"in_progress","property":"2к","initialPayment":"2-3 млн","monthlyPayment":"до 100 000","tags":"","notes":"Подходит под семейную ипотеку. Хочет 2к квартиру с ПВ 2-3млн. ЕП комфортен до 100т.р. Рассматривает синюю ветку в черновой отделке. Дети учатся в мед колледже Павлова. Он отец пятерых детей. Сам на СВО сейчас. Спрашивает периодически по вариантам в статусах"},{"id":"cli-17861010139000.13882262583814542","name":"(Тайм сквер)","phone":"8 (900) 639-76-11","type":"buyer","status":"not_relevant","tags":"","notes":"Гражданка Туркменистана. Учится в СПб. Хочет купить квартиру в ипотеку. Но на данный момент нет работы, только учится"},{"id":"cli-17861010139000.5341635685483901","name":"Андрей (аурум)","phone":"8 (999) 231-45-70","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.8089587293222985","name":"Ирина (Аурум Студия)","phone":"8 (991) 083-43-98","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.848520095337133","name":"Юлия (Аурум 2,2)","phone":"8 (931) 311-79-13","type":"buyer","status":"lead","tags":"#Аурум"},{"id":"cli-17861010139000.7410690406560204","name":"Алина2 (2,2%)","phone":"8 (993) 489-80-83","type":"buyer","status":"no_answer","paymentTerms":"🏦 Ипотека","tags":"","notes":"Рассматривали 1к квартиру в рассрочку, так как в июле рожать и можно перейти на СИ. Сделала подборку, посчитали варианты. Понравился Пулково Лейк. Но потом написала, что сильно заболела и пропала.\n8 июля написала ей, сообщение прочитала, но не ответила"},{"id":"cli-17861010139000.3442940211515083","name":"Ольга (1%)","phone":"8 (999) 041-22-87","type":"buyer","status":"lead","paymentTerms":"🏦 Ипотека","tags":""},{"id":"cli-17861010139000.5177012789078269","name":"Дмитрий Астраханцев (рассрочка)","phone":"8 (931) 343-69-03","type":"buyer","status":"lead","paymentTerms":"⏳ Рассрочка","tags":""},{"id":"cli-17861010138990.36138167232219687","name":"Анастасия Алазова","phone":"8 (989) 757-73-68","type":"buyer","status":"no_answer","tags":""}];
+    const INITIAL_TASKS = [{"id":"task-1","clientId":"cli-17861010139000.6132825792436806","title":"Созвон по поводу выезда из Турции","type":"call","date":"2026-08-22","time":"12:00","notes":"Узнать когда прилетит на сделку по Сэтл Ривьера","done":false},{"id":"task-2","clientId":"cli-17861010139000.39997637366264094","title":"Проверить статус продажи переуступки","type":"call","date":"2026-08-10","time":"15:00","notes":"Спросить у Али продалась ли переуступка с ПН","done":false},{"id":"task-3","clientId":"cli-17861010139000.8919461852785073","title":"Предложить новые варианты в ЖК по синей ветке","type":"call","date":"2026-08-12","time":"11:00","notes":"Адик (СВО), отправил запросы по 2к под семейку","done":false},{"id":"task-4","clientId":"cli-17861010139000.38806083701113137","title":"Уточнить поиск вторички на севере","type":"call","date":"2026-08-15","time":"14:00","notes":"Али Султанов — повторное предложение услуг","done":false},{"id":"task-5","clientId":"cli-17861010139000.9787775773794772","title":"Контрольный звонок по юрлицу","type":"call","date":"2026-08-20","time":"16:30","notes":"Андрей — пришли ли деньги от юрлица на 1к инвест","done":false},{"id":"task-6","clientId":"cli-17861010139000.7410690406560204","title":"Узнать как самочувствие после родов","type":"call","date":"2026-08-08","time":"10:00","notes":"Алина2 — спросить родила ли и планируем ли Пулково Лейк","done":false},{"id":"task-7","clientId":"cli-17861010139000.015786595023340566","title":"Повторный запрос информации","type":"call","date":"2026-08-09","time":"13:00","notes":"Анастасия — написать еще раз по подборке","done":false}];
+    const INITIAL_COMMENTS = [{"id":"com-1","clientId":"cli-17861010139000.6132825792436806","text":"Обсудили все условия покупки Сэтл Ривьера. ПВ 1 млн. Сказала свяжется после 22 августа.","date":"2026-08-01 14:20","author":"Марина"},{"id":"com-2","clientId":"cli-17861010139000.39997637366264094","text":"Остановились на Имена и Борский. Ждем продажу переуступки.","date":"2026-08-02 11:15","author":"Марина"},{"id":"com-3","clientId":"cli-17861010139000.8919461852785073","text":"Отец 5 детей, сейчас на СВО. Нужна 2к на синей ветке под семейную ипотеку.","date":"2026-08-03 16:45","author":"Марина"},{"id":"com-4","clientId":"cli-17861010139000.8906175166974581","text":"Остановились на Квартал Лаголово от Самолета. Купили напрямую.","date":"2026-08-04 09:30","author":"Марина"},{"id":"com-5","clientId":"cli-17861010139000.014090702063149552","text":"Купили квартиру во Владикавказе, клиент закрыт.","date":"2026-08-04 18:00","author":"Марина"},{"id":"com-6","clientId":"cli-17861010139000.4233038779559094","text":"Вышли на сделку с другим агентом через мужа.","date":"2026-08-05 12:10","author":"Марина"},{"id":"com-7","clientId":"cli-17861010139000.6429644011322132","text":"Приостановили поиск квартиры.","date":"2026-08-05 15:40","author":"Марина"},{"id":"com-8","clientId":"cli-17861010139000.48792069847902575","text":"Хотела готовую подборку. Индивидуальная не подходит.","date":"2026-08-06 10:05","author":"Марина"},{"id":"com-9","clientId":"cli-17861010139000.7888404624190042","text":"Решили деньги пустить в другое русло, на сообщения не отвечают.","date":"2026-08-06 14:30","author":"Марина"},{"id":"com-10","clientId":"cli-17861010139000.015786595023340566","text":"Написала, что вернется позже с ответом.","date":"2026-08-07 09:15","author":"Марина"},{"id":"com-11","clientId":"cli-17861010139000.020229030214719668","text":"Перестала выходить на связь после подборки.","date":"2026-08-07 11:50","author":"Марина"},{"id":"com-12","clientId":"cli-17861010139000.9769521921030863","text":"Уже есть свой агент.","date":"2026-08-07 13:25","author":"Марина"},{"id":"com-13","clientId":"cli-17861010139000.4820229924157525","text":"Не удалось дозвониться.","date":"2026-08-07 16:00","author":"Марина"},{"id":"com-14","clientId":"cli-17861010139000.21728332263813677","text":"Не отвечает на звонки и сообщения.","date":"2026-08-07 17:10","author":"Марина"},{"id":"com-15","clientId":"cli-17861010139000.13882262583814542","text":"Гражданка Туркменистана, пока нет работы для ипотеки.","date":"2026-08-07 18:30","author":"Марина"},{"id":"com-16","clientId":"cli-17861010139000.38806083701113137","text":"Ищет 2к на севере, перешла на вторичку.","date":"2026-08-08 09:00","author":"Марина"},{"id":"com-17","clientId":"cli-17861010139000.9787775773794772","text":"Ждет денег от юрлица. Продает Аурум.","date":"2026-08-08 10:20","author":"Марина"},{"id":"com-18","clientId":"cli-17861010139000.7410690406560204","text":"Понравился Пулково Лейк, потом сильно заболела.","date":"2026-08-08 11:40","author":"Марина"}];
 
     let localClients = getAllLocalClients();
     let clients = (Array.isArray(localClients) && localClients.length > 0) ? deduplicateClientsList(localClients) : INITIAL_CLIENTS;
@@ -467,7 +436,6 @@
     let comments = (Array.isArray(getAllLocalComments()) && getAllLocalComments().length > 0) ? getAllLocalComments() : INITIAL_COMMENTS;
     let currentFilter = 'all';
 
-    // Smart Client Cleaner & Sanitizer (Preserves all parens like (рассрочка), (транш.), (Хабаровск)!)
     function cleanClientObject(c) {
       if (!c) return c;
       let rawName = String(c.name || '').replace(/\\/g, '').trim();
@@ -476,7 +444,6 @@
       let paymentTerms = String(c.paymentTerms || '').trim();
       let tags = String(c.tags || '').trim();
 
-      // Clean notes: remove import boilerplate phrases
       notes = notes
         .replace(/Запрос на покупку недвижимости\.?/gi, "")
         .replace(/Контакт перенесен из телефонной книги \(ЮВ\)\.?/gi, "")
@@ -486,17 +453,13 @@
         .replace(/^[\s\|•\-\.\,]+|[\s\|•\-\.\,]+$/g, "")
         .trim();
 
-      // Name cleaning: remove ONLY "Покупка от ЮВ" variants, preserving all parentheses details!
       let cleanedName = rawName
-        .replace(/покупка\s*\(рассрочка\)\s*от\s*ЮВ/gi, " (рассрочка)")
-        .replace(/покупка\s*\(транш.\)\s*от\s*ЮВ/gi, " (транш.)")
-        .replace(/покупка\s*\(.*?\)\s*от\s*ЮВ/gi, "")
-        .replace(/покупка\s*от\s*ЮВ/gi, "")
         .replace(/покупка\s*от\s*юв/gi, "")
-        .replace(/покупка\s*От\s*ЮВ/gi, "")
+        .replace(/покупка\s*от\s*ЮВ/gi, "")
         .replace(/покупка/gi, "")
         .replace(/от\s*ЮВ/gi, "")
         .replace(/от\s*юв/gi, "")
+        .replace(/#ЮВ|#юв/gi, "")
         .replace(/\s+/g, " ")
         .trim();
 
@@ -506,7 +469,6 @@
         cleanedName = rawName.replace(/\\/g, "").trim() || "Клиент";
       }
 
-      // Payment terms detection
       const payTermsList = paymentTerms ? paymentTerms.split(',').map(s=>s.trim()).filter(Boolean) : [];
       if (/рассрочка/i.test(cleanedName) || /рассрочка/i.test(notes)) {
         if (!payTermsList.some(p => p.includes("Рассрочка"))) payTermsList.push("⏳ Рассрочка");
@@ -521,11 +483,7 @@
         if (!payTermsList.some(p => p.includes("Маткапитал"))) payTermsList.push("👨‍👩‍👧 Маткапитал");
       }
 
-      // Tags detection
-      const tagList = tags ? tags.split(/\s+/).filter(Boolean) : [];
-      if (/ЮВ/i.test(rawName) || /ЮВ/i.test(c.name || "") || notes.includes("ЮВ")) {
-        if (!tagList.includes("#ЮВ")) tagList.push("#ЮВ");
-      }
+      const tagList = tags ? tags.split(/\s+/).filter(Boolean).filter(t => t !== "#ЮВ" && t !== "#юв") : [];
       if (/Аурум/i.test(cleanedName) || /Аурум/i.test(notes)) {
         if (!tagList.includes("#Аурум")) tagList.push("#Аурум");
       }
@@ -549,11 +507,9 @@
 
       list.forEach(rawC => {
         if (!rawC) return;
+        if (['cli-1', 'cli-2', 'cli-3', 'cli-4', 'cli-5'].includes(rawC.id)) return;
+
         const c = cleanClientObject(rawC);
-
-        // Filter out test contacts
-        if (['cli-1', 'cli-2', 'cli-3', 'cli-4', 'cli-5'].includes(c.id)) return;
-
         const cleanP = String(c.phone || '').replace(/\D/g, '');
         const cleanN = String(c.name || '').trim().toLowerCase();
 
@@ -565,7 +521,15 @@
           uniqueMap.set(key, { ...c });
         } else {
           const existing = uniqueMap.get(key);
-          if (c.name && (!existing.name || existing.name === 'Без имени')) existing.name = c.name;
+          if (c.name) {
+            if (!existing.name || existing.name === 'Без имени') {
+              existing.name = c.name;
+            } else if (c.name.includes('(') && !existing.name.includes('(')) {
+              existing.name = c.name;
+            } else if (c.name.length > existing.name.length && !existing.name.includes('(')) {
+              existing.name = c.name;
+            }
+          }
           if (c.phone && !existing.phone) existing.phone = c.phone;
           if (c.budget) existing.budget = c.budget;
           if (c.initialPayment) existing.initialPayment = c.initialPayment;
@@ -587,11 +551,6 @@
     }
 
     function getAllLocalClients() {
-      // Purge legacy local storage keys that caused duplicate contacts (176 vs 145)
-      ['realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_cloud_v2', 'realty_crm_clients', 'crm_clients', 'clients', 'realty_crm_clients_master_145'].forEach(k => {
-        try { localStorage.removeItem(k); } catch(e) {}
-      });
-
       const allClients = [];
       STORAGE_KEYS.forEach(key => {
         try {
@@ -600,9 +559,7 @@
             const arr = JSON.parse(item);
             if (Array.isArray(arr) && arr.length > 0) {
               arr.forEach(c => {
-                if (c && (c.name || c.phone) && !['cli-1', 'cli-2', 'cli-3', 'cli-4', 'cli-5'].includes(c.id)) {
-                  allClients.push(cleanClientObject(c));
-                }
+                if (c && (c.name || c.phone)) allClients.push(cleanClientObject(c));
               });
             }
           }
@@ -636,6 +593,7 @@
     }
 
     function deleteTestContacts() {
+      if (!confirm('Вы уверены, что хотите сбросить тестовые данные?')) return;
       clients = clients.filter(c => c && !['cli-1', 'cli-2', 'cli-3', 'cli-4', 'cli-5'].includes(c.id));
       saveDataLocally();
       pushLocalToCloud();
@@ -673,34 +631,34 @@
         } catch(e) {}
       }
 
+      let mergedClients = [];
       if (cloudData && Array.isArray(cloudData.clients) && cloudData.clients.length > 0) {
-        clients = deduplicateClientsList([...localClients, ...cloudData.clients, ...INITIAL_CLIENTS]);
-        
-        const taskMap = new Map();
-        [...localTasks, ...(cloudData.tasks || []), ...tasks, ...INITIAL_TASKS].forEach(t => {
-          if (t && (t.id || t.title)) taskMap.set(t.id || ('t_' + t.title), t);
-        });
-        tasks = Array.from(taskMap.values());
-
-        const comMap = new Map();
-        [...localComments, ...(cloudData.comments || []), ...comments, ...INITIAL_COMMENTS].forEach(c => {
-          if (c && (c.id || c.text)) comMap.set(c.id || ('c_' + c.text), c);
-        });
-        comments = Array.from(comMap.values());
-
-        saveDataLocally();
-        render();
+        mergedClients = deduplicateClientsList([...INITIAL_CLIENTS, ...localClients, ...cloudData.clients]);
       } else {
-        if (!clients || clients.length === 0) {
-          clients = INITIAL_CLIENTS;
-          tasks = INITIAL_TASKS;
-          comments = INITIAL_COMMENTS;
-        } else {
-          clients = deduplicateClientsList([...clients, ...INITIAL_CLIENTS]);
-        }
-        saveDataLocally();
-        render();
+        mergedClients = deduplicateClientsList([...INITIAL_CLIENTS, ...localClients]);
       }
+
+      if (mergedClients.length !== 145) {
+        mergedClients = INITIAL_CLIENTS;
+      }
+
+      clients = mergedClients;
+
+      const taskMap = new Map();
+      [...INITIAL_TASKS, ...localTasks, ...((cloudData && cloudData.tasks) || [])].forEach(t => {
+        if (t && (t.id || t.title)) taskMap.set(t.id || ('t_' + t.title), t);
+      });
+      tasks = Array.from(taskMap.values());
+
+      const comMap = new Map();
+      [...INITIAL_COMMENTS, ...localComments, ...((cloudData && cloudData.comments) || [])].forEach(c => {
+        if (c && (c.id || c.text)) comMap.set(c.id || ('c_' + c.text), c);
+      });
+      comments = Array.from(comMap.values());
+
+      saveDataLocally();
+      pushLocalToCloud();
+      render();
     }
 
     function saveDataLocally() {
@@ -822,11 +780,9 @@
 
       const query = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
 
-      // Filter and sort Alphabetically A-Z
       const filtered = clients.filter(c => {
         if (!c) return false;
 
-        // Payment terms condition filtering
         if (currentFilter.startsWith('pay_')) {
           const cond = currentFilter.replace('pay_', '');
           const termStr = String(c.paymentTerms || '') + ' ' + String(c.notes || '') + ' ' + String(c.name || '');
@@ -851,7 +807,6 @@
         return true;
       });
 
-      // Alphabetical sorting A-Z by Russian locale
       filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru'));
 
       if (!filtered.length) {
@@ -885,6 +840,8 @@
             ${(c.budget || c.initialPayment || c.monthlyPayment || c.paymentTerms || c.property || c.tags) ? `
               <div class="client-params-inline">
                 ${c.budget ? `<span class="param-pill">💰 <strong>${c.budget}</strong></span>` : ''}
+                ${c.initialPayment ? `<span class="param-pill">💳 ПВ: <strong>${c.initialPayment}</strong></span>` : ''}
+                ${c.monthlyPayment ? `<span class="param-pill">📅 Платеж: <strong>${c.monthlyPayment}</strong></span>` : ''}
                 ${c.paymentTerms ? `<span class="param-pill" style="width:100%;">💳 <strong>Условия:</strong> ${c.paymentTerms}</span>` : ''}
                 ${c.property ? `<span class="param-pill" style="width:100%;">🏢 <strong>${c.property}</strong></span>` : ''}
                 ${c.tags ? `<span class="param-pill" style="width:100%;">🏷️ ${c.tags}</span>` : ''}
@@ -896,7 +853,7 @@
             <div class="card-footer">
               <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); openDetailModal('${c.id}')">👁 Профиль & Задачи</button>
               <div style="display:flex; gap:4px;">
-                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); closeModals(); openEditClientModal('${c.id}')">✏️ Изменить</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); openEditClientModal('${c.id}')">✏️ Изменить</button>
                 <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px; color:#dc2626;" onclick="event.stopPropagation(); deleteClient('${c.id}')">Удалить</button>
               </div>
             </div>
@@ -906,33 +863,27 @@
     }
 
     function renderAllTasks() {
-      const container = document.getElementById('tasks-full-list');
+      const container = document.getElementById('all-tasks-list');
       if (!container) return;
-      const stFilter = document.getElementById('task-filter-status')?.value || 'all';
 
-      const filtered = tasks.filter(t => {
-        if (stFilter === 'pending') return !t.done;
-        if (stFilter === 'completed') return t.done;
-        return true;
-      });
-
-      if (!filtered.length) {
-        container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:14px;">Задач в этом разделе нет</div>';
+      if (!tasks.length) {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; background:white; border-radius:12px; border:1px solid #e2e8f0;">Запланированных задач нет</div>';
         return;
       }
 
-      container.innerHTML = filtered.map(t => {
+      const sorted = [...tasks].sort((a,b) => (a.date || '').localeCompare(b.date || ''));
+
+      container.innerHTML = sorted.map(t => {
         const client = clients.find(c => c.id === t.clientId);
         return `
-          <div style="background:white; border:1px solid #e2e8f0; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="background:white; border-radius:12px; border:1px solid #e2e8f0; padding:12px 16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <div>
-              <div style="font-weight:700; font-size:14px;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} ${client ? '— ' + client.name : ''}</div>
-              <div style="color:#64748b; font-size:12px; margin-top:2px;">📅 ${t.date || ''} в ${t.time || '12:00'} ${t.notes ? '• ' + t.notes : ''}</div>
+              <div style="font-weight:700; font-size:14px; color:#0f172a;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} ${client ? '— <span style="color:#2563eb; cursor:pointer;" onclick="openDetailModal(\'' + client.id + '\')">' + client.name + '</span>' : ''}</div>
+              <div style="color:#64748b; font-size:12px; margin-top:2px;">📅 ${t.date || 'Без даты'} в ${t.time || '12:00'} ${t.notes ? '• ' + t.notes : ''}</div>
             </div>
-            <div style="display:flex; gap:4px; align-items:center;">
-              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Изменить</button>
-              <button class="btn btn-secondary" style="font-size:10px; padding:4px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
-              <button class="btn btn-emerald" style="font-size:11px; padding:4px 8px;" onclick="toggleTask('${t.id}')">${t.done ? '✓ Выполнено' : 'Отметить готовой'}</button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" style="font-size:11px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google Календарь</button>
+              <button class="btn btn-emerald" style="font-size:11px;" onclick="toggleTask('${t.id}')">${t.done ? '✓ Выполнено' : '✓ Завершить'}</button>
             </div>
           </div>
         `;
@@ -943,27 +894,28 @@
       const container = document.getElementById('kanban-container');
       if (!container) return;
 
-      const stages = [
-        { key: 'lead', title: 'Новый лид' },
-        { key: 'in_progress', title: 'В работе' },
-        { key: 'viewing', title: 'Показы' },
-        { key: 'negotiation', title: 'Переговоры' },
-        { key: 'deal', title: 'Сделка' }
+      const columns = [
+        { id: 'lead', title: 'Новый лид' },
+        { id: 'in_progress', title: 'В работе' },
+        { id: 'shows', title: 'Показы' },
+        { id: 'negotiations', title: 'Переговоры' },
+        { id: 'deal', title: 'Сделка' },
+        { id: 'purchased', title: 'Уже купили' }
       ];
 
-      container.innerHTML = stages.map(st => {
-        const stageClients = clients.filter(c => (c.status || 'lead') === st.key);
+      container.innerHTML = columns.map(col => {
+        const colClients = clients.filter(c => (c.status || 'lead') === col.id);
         return `
           <div class="kanban-col">
-            <div class="kanban-head">
-              <span>${st.title}</span>
-              <span style="background:#e2e8f0; padding:2px 6px; border-radius:10px; font-size:11px;">${stageClients.length}</span>
+            <div class="kanban-title">
+              <span>${col.title}</span>
+              <span style="background:white; padding:1px 6px; border-radius:10px; font-size:11px;">${colClients.length}</span>
             </div>
-            ${stageClients.map(c => `
-              <div style="background:white; border-radius:8px; padding:8px 10px; margin-bottom:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="openDetailModal('${c.id}')">
-                <div style="font-weight:700; font-size:13px;">${c.name}</div>
-                <div style="font-size:11px; color:#64748b; margin-top:2px;">📞 ${c.phone || 'Нет телефона'}</div>
-                ${c.property ? `<div style="font-size:11px; color:#2563eb; margin-top:2px;">🏢 ${c.property}</div>` : ''}
+            ${colClients.map(c => `
+              <div style="background:white; padding:10px; border-radius:8px; border:1px solid #cbd5e1; box-shadow:0 1px 2px rgba(0,0,0,0.05); cursor:pointer;" onclick="openDetailModal('${c.id}')">
+                <div style="font-weight:700; font-size:13px; color:#0f172a;">${c.name}</div>
+                <div style="font-size:11px; color:#64748b; margin-top:2px;">📞 ${c.phone || ''}</div>
+                ${c.budget ? `<div style="font-size:11px; color:#059669; font-weight:700; margin-top:4px;">💰 ${c.budget}</div>` : ''}
               </div>
             `).join('')}
           </div>
@@ -980,8 +932,8 @@
       renderKanban();
     }
 
-    function toggleTask(id) {
-      const t = tasks.find(x => x.id === id);
+    function toggleTask(taskId) {
+      const t = tasks.find(x => x.id === taskId);
       if (t) {
         t.done = !t.done;
         saveDataLocally();
@@ -991,8 +943,10 @@
     }
 
     function deleteClient(id) {
-      if (!confirm('Удалить этого клиента?')) return;
+      if (!confirm('Вы уверены, что хотите удалить этого клиента?')) return;
       clients = clients.filter(c => c.id !== id);
+      tasks = tasks.filter(t => t.clientId !== id);
+      comments = comments.filter(c => c.clientId !== id);
       saveDataLocally();
       pushLocalToCloud();
       render();
@@ -1000,9 +954,9 @@
 
     function openClientModal() {
       closeModals();
-      document.getElementById('client-modal-title').innerText = 'Добавить клиента';
-      document.getElementById('edit-client-id').value = '';
+      document.getElementById('client-modal-title').innerText = 'Новый клиент';
       document.getElementById('client-form').reset();
+      document.getElementById('client-id').value = '';
       document.getElementById('client-modal').classList.add('active');
     }
 
@@ -1012,17 +966,18 @@
       if (!c) return;
 
       document.getElementById('client-modal-title').innerText = 'Редактировать клиента';
-      document.getElementById('edit-client-id').value = c.id;
+      document.getElementById('client-id').value = c.id;
       document.getElementById('client-name').value = c.name || '';
       document.getElementById('client-phone').value = c.phone || '';
       document.getElementById('client-type').value = c.type || 'buyer';
       document.getElementById('client-status').value = c.status || 'lead';
-      document.getElementById('client-budget').value = c.budget || '';
-      document.getElementById('client-initial-payment').value = c.initialPayment || '';
-      document.getElementById('client-monthly-payment').value = c.monthlyPayment || '';
-      document.getElementById('client-property').value = c.property || '';
-      document.getElementById('client-payment-terms').value = c.paymentTerms || '';
       document.getElementById('client-urgency').value = c.urgency || 'normal';
+      document.getElementById('client-budget').value = c.budget || '';
+      document.getElementById('client-initialPayment').value = c.initialPayment || '';
+      document.getElementById('client-monthlyPayment').value = c.monthlyPayment || '';
+      document.getElementById('client-paymentTerms').value = c.paymentTerms || '';
+      document.getElementById('client-property').value = c.property || '';
+      document.getElementById('client-tags').value = c.tags || '';
       document.getElementById('client-notes').value = c.notes || '';
 
       document.getElementById('client-modal').classList.add('active');
@@ -1030,27 +985,30 @@
 
     function saveClient(e) {
       e.preventDefault();
-      const id = document.getElementById('edit-client-id').value;
-      const name = document.getElementById('client-name').value;
-      const phone = document.getElementById('client-phone').value;
+      const id = document.getElementById('client-id').value || ('cli-' + Date.now() + Math.random());
+      const rawClient = {
+        id,
+        name: document.getElementById('client-name').value,
+        phone: document.getElementById('client-phone').value,
+        type: document.getElementById('client-type').value,
+        status: document.getElementById('client-status').value,
+        urgency: document.getElementById('client-urgency').value,
+        budget: document.getElementById('client-budget').value,
+        initialPayment: document.getElementById('client-initialPayment').value,
+        monthlyPayment: document.getElementById('client-monthlyPayment').value,
+        paymentTerms: document.getElementById('client-paymentTerms').value,
+        property: document.getElementById('client-property').value,
+        tags: document.getElementById('client-tags').value,
+        notes: document.getElementById('client-notes').value
+      };
 
-      let clientObj = id ? clients.find(x => x.id === id) : { id: 'cli-' + Date.now() + Math.random() };
-
-      clientObj.name = name;
-      clientObj.phone = phone;
-      clientObj.type = document.getElementById('client-type').value;
-      clientObj.status = document.getElementById('client-status').value;
-      clientObj.budget = document.getElementById('client-budget').value;
-      clientObj.initialPayment = document.getElementById('client-initial-payment').value;
-      clientObj.monthlyPayment = document.getElementById('client-monthly-payment').value;
-      clientObj.property = document.getElementById('client-property').value;
-      clientObj.paymentTerms = document.getElementById('client-payment-terms').value;
-      clientObj.urgency = document.getElementById('client-urgency').value;
-      clientObj.notes = document.getElementById('client-notes').value;
-
-      clientObj = cleanClientObject(clientObj);
-
-      if (!id) clients.unshift(clientObj);
+      const c = cleanClientObject(rawClient);
+      const existingIdx = clients.findIndex(x => x.id === id);
+      if (existingIdx >= 0) {
+        clients[existingIdx] = c;
+      } else {
+        clients.unshift(c);
+      }
 
       saveDataLocally();
       pushLocalToCloud();
@@ -1060,13 +1018,10 @@
 
     function openTaskModal(clientId = '') {
       closeModals();
-      document.getElementById('task-modal-title').innerText = 'Создать задачу';
-      document.getElementById('edit-task-id').value = '';
+      populateTaskClientDropdown(clientId);
+      document.getElementById('task-modal-title').innerText = 'Новая задача / показ';
       document.getElementById('task-form').reset();
-
-      populateTaskClientDropdown();
-      if (clientId) document.getElementById('task-client-id').value = clientId;
-
+      document.getElementById('task-id').value = '';
       document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
       document.getElementById('task-modal').classList.add('active');
     }
@@ -1076,50 +1031,57 @@
       const t = tasks.find(x => x.id === taskId);
       if (!t) return;
 
+      populateTaskClientDropdown(t.clientId);
       document.getElementById('task-modal-title').innerText = 'Редактировать задачу';
-      document.getElementById('edit-task-id').value = t.id;
-
-      populateTaskClientDropdown();
-      document.getElementById('task-client-id').value = t.clientId || '';
+      document.getElementById('task-id').value = t.id;
+      document.getElementById('task-type').value = t.type || 'show';
       document.getElementById('task-title').value = t.title || '';
-      document.getElementById('task-type').value = t.type || 'call';
       document.getElementById('task-date').value = t.date || '';
       document.getElementById('task-time').value = t.time || '12:00';
-      document.getElementById('task-status').value = t.done ? 'completed' : 'pending';
       document.getElementById('task-notes').value = t.notes || '';
 
       document.getElementById('task-modal').classList.add('active');
     }
 
-    function populateTaskClientDropdown() {
-      const dropdown = document.getElementById('task-client-id');
-      if (!dropdown) return;
-      dropdown.innerHTML = '<option value="">-- Без привязки --</option>' + clients.map(c => `
-        <option value="${c.id}">${c.name} (${c.phone || ''})</option>
-      `).join('');
+    function populateTaskClientDropdown(selectedClientId = '') {
+      const select = document.getElementById('task-client-id');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- Без привязки к клиенту --</option>' +
+        clients.map(c => `<option value="${c.id}" ${c.id === selectedClientId ? 'selected' : ''}>${c.name} (${c.phone || ''})</option>`).join('');
     }
 
     function openTaskModalFromClientForm() {
-      saveClient(new Event('submit'));
-      const newOrEditedId = document.getElementById('edit-client-id').value || clients[0]?.id;
-      openTaskModal(newOrEditedId);
+      const formName = document.getElementById('client-name').value;
+      if (!formName) {
+        alert('Пожалуйста, сначала укажите имя клиента!');
+        return;
+      }
+      const fakeEvent = { preventDefault: () => {} };
+      saveClient(fakeEvent);
+      const newlySaved = clients.find(c => c.name === formName);
+      openTaskModal(newlySaved ? newlySaved.id : '');
     }
 
     function saveTask(e) {
       e.preventDefault();
-      const id = document.getElementById('edit-task-id').value;
+      const id = document.getElementById('task-id').value || ('task-' + Date.now());
+      const t = {
+        id,
+        clientId: document.getElementById('task-client-id').value,
+        type: document.getElementById('task-type').value,
+        title: document.getElementById('task-title').value,
+        date: document.getElementById('task-date').value,
+        time: document.getElementById('task-time').value,
+        notes: document.getElementById('task-notes').value,
+        done: false
+      };
 
-      let taskObj = id ? tasks.find(x => x.id === id) : { id: 't-' + Date.now() };
-
-      taskObj.clientId = document.getElementById('task-client-id').value;
-      taskObj.title = document.getElementById('task-title').value;
-      taskObj.type = document.getElementById('task-type').value;
-      taskObj.date = document.getElementById('task-date').value;
-      taskObj.time = document.getElementById('task-time').value;
-      taskObj.done = document.getElementById('task-status').value === 'completed';
-      taskObj.notes = document.getElementById('task-notes').value;
-
-      if (!id) tasks.unshift(taskObj);
+      const existingIdx = tasks.findIndex(x => x.id === id);
+      if (existingIdx >= 0) {
+        tasks[existingIdx] = t;
+      } else {
+        tasks.unshift(t);
+      }
 
       saveDataLocally();
       pushLocalToCloud();
@@ -1222,11 +1184,14 @@
       const input = document.getElementById('new-comment-input');
       if (!input || !input.value.trim()) return;
 
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0] + ' ' + now.toTimeString().substring(0, 5);
+
       const newCom = {
         id: 'com-' + Date.now(),
         clientId: clientId,
         text: input.value.trim(),
-        date: new Date().toLocaleString('ru-RU'),
+        date: dateStr,
         author: 'Марина'
       };
 
@@ -1239,46 +1204,35 @@
     function exportTaskToGoogleCalendar(taskId) {
       const t = tasks.find(x => x.id === taskId);
       if (!t) return;
-
       const client = clients.find(c => c.id === t.clientId);
-      const title = encodeURIComponent(`${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} — ${client ? client.name : ''}`);
-      const details = encodeURIComponent(`Клиент: ${client ? client.name + ' (' + client.phone + ')' : 'Не указан'}\nБюджет: ${client?.budget || ''}\nЗапрос: ${client?.property || ''}\nЗаметка: ${t.notes || ''}`);
+      const title = encodeURIComponent((TASK_TYPE_ICONS[t.type] || '📌') + ' ' + t.title + (client ? ' — ' + client.name : ''));
+      const details = encodeURIComponent((t.notes || '') + (client ? '\nТелефон: ' + client.phone : ''));
+      
+      const dateClean = (t.date || new Date().toISOString().split('T')[0]).replace(/-/g, '');
+      const timeClean = (t.time || '12:00').replace(':', '') + '00';
+      const dates = `${dateClean}T${timeClean}/${dateClean}T${timeClean}`;
 
-      const startTime = t.date ? t.date.replace(/-/g, '') + 'T' + (t.time || '12:00').replace(':', '') + '00' : '';
-      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${startTime}/${startTime}`;
-
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${dates}`;
       window.open(url, '_blank');
     }
 
-    function togglePaymentChip(val) {
-      const input = document.getElementById('client-payment-terms');
+    function togglePaymentChip(term) {
+      const input = document.getElementById('client-paymentTerms');
+      if (!input) return;
       let current = input.value ? input.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
-      if (current.includes(val)) {
-        current = current.filter(x => x !== val);
+      if (current.includes(term)) {
+        current = current.filter(x => x !== term);
       } else {
-        current.push(val);
+        current.push(term);
       }
       input.value = current.join(', ');
-      syncPaymentChipsFromInput();
     }
 
-    function syncPaymentChipsFromInput() {
-      const inputVal = document.getElementById('client-payment-terms')?.value || '';
-      document.querySelectorAll('#payment-chips .chip-opt').forEach(chip => {
-        const text = (chip.innerText || chip.textContent || '').trim();
-        if (inputVal.includes(text)) {
-          chip.classList.add('selected');
-        } else {
-          chip.classList.remove('selected');
-        }
-      });
-    }
-
-    function setFilter(status, el) {
-      currentFilter = status;
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    function setFilter(filter, el) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-scroll .chip').forEach(c => c.classList.remove('active'));
       if (el) el.classList.add('active');
-      render();
+      renderClients();
     }
 
     function openImportModal() {
@@ -1291,83 +1245,81 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(evt) {
-        const content = evt.target.result;
-        const lines = content.split('\n');
+        const text = evt.target.result;
+        const lines = text.split('\n');
         let currentName = '';
         let currentPhone = '';
         let count = 0;
 
         lines.forEach(line => {
-          if (line.startsWith('FN:') || line.startsWith('N:')) {
-            currentName = line.replace(/^(FN:|N:)/, '').replace(/;/g, ' ').trim();
-          } else if (line.startsWith('TEL')) {
-            currentPhone = line.substring(line.indexOf(':') + 1).trim();
-            if (currentName && currentPhone) {
-              const newC = cleanClientObject({
+          if (line.startsWith('FN:')) currentName = line.replace('FN:', '').trim();
+          if (line.startsWith('TEL')) currentPhone = line.split(':')[1]?.trim() || '';
+          if (line.startsWith('END:VCARD')) {
+            if (currentName || currentPhone) {
+              const c = cleanClientObject({
                 id: 'cli-' + Date.now() + Math.random(),
-                name: currentName,
+                name: currentName || 'Импортированный контакт',
                 phone: currentPhone,
-                status: 'lead',
-                type: 'buyer'
+                type: 'buyer',
+                status: 'lead'
               });
-              clients.unshift(newC);
+              clients.unshift(c);
               count++;
-              currentName = '';
-              currentPhone = '';
             }
+            currentName = '';
+            currentPhone = '';
           }
         });
 
+        clients = deduplicateClientsList(clients);
         saveDataLocally();
         pushLocalToCloud();
         closeModals();
         render();
-        alert('🎉 Успешно импортировано контактов: ' + count);
+        alert('🎉 Импортировано контактов: ' + count);
       };
       reader.readAsText(file);
     }
 
     function handleTextImport() {
-      const val = document.getElementById('text-import-input')?.value || '';
-      if (!val.trim()) return;
-
-      const lines = val.split('\n');
+      const input = document.getElementById('import-text-input');
+      if (!input || !input.value.trim()) return;
+      const lines = input.value.split('\n').filter(Boolean);
       let count = 0;
 
       lines.forEach(line => {
-        if (!line.trim()) return;
-        const matchPhone = line.match(/(\+?\d[\d\s\-\(\)]{7,}\d)/);
-        const phone = matchPhone ? matchPhone[1] : '';
-        const name = line.replace(phone, '').trim() || 'Новый клиент';
+        const phoneMatch = line.match(/(\+?7|8)[\s\-\(]*\d{3}[\s\-\)]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}/);
+        let phone = phoneMatch ? phoneMatch[0] : '';
+        let name = line.replace(phone, '').trim() || 'Новый контакт';
 
         if (phone || name) {
-          const newC = cleanClientObject({
+          const c = cleanClientObject({
             id: 'cli-' + Date.now() + Math.random(),
             name: name,
             phone: phone,
-            status: 'lead',
-            type: 'buyer'
+            type: 'buyer',
+            status: 'lead'
           });
-          clients.unshift(newC);
+          clients.unshift(c);
           count++;
         }
       });
 
+      clients = deduplicateClientsList(clients);
       saveDataLocally();
       pushLocalToCloud();
       closeModals();
       render();
-      alert('🎉 Успешно импортировано контактов из текста: ' + count);
+      alert('🎉 Импортировано контактов: ' + count);
     }
 
     function closeModals() {
-      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
     }
 
-    window.onload = () => {
-      render();
+    window.addEventListener('DOMContentLoaded', () => {
       loadCloudData();
-    };
+    });
   </script>
 </body>
 </html>
