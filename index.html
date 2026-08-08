@@ -476,6 +476,7 @@
       let paymentTerms = String(c.paymentTerms || '').trim();
       let tags = String(c.tags || '').trim();
 
+      // Clean notes: remove import boilerplate phrases
       notes = notes
         .replace(/Запрос на покупку недвижимости\.?/gi, "")
         .replace(/Контакт перенесен из телефонной книги \(ЮВ\)\.?/gi, "")
@@ -485,6 +486,7 @@
         .replace(/^[\s\|•\-\.\,]+|[\s\|•\-\.\,]+$/g, "")
         .trim();
 
+      // Name cleaning: remove ONLY "Покупка от ЮВ" variants, preserving all parentheses details!
       let cleanedName = rawName
         .replace(/покупка\s*\(рассрочка\)\s*от\s*ЮВ/gi, " (рассрочка)")
         .replace(/покупка\s*\(транш.\)\s*от\s*ЮВ/gi, " (транш.)")
@@ -504,6 +506,7 @@
         cleanedName = rawName.replace(/\\/g, "").trim() || "Клиент";
       }
 
+      // Payment terms detection
       const payTermsList = paymentTerms ? paymentTerms.split(',').map(s=>s.trim()).filter(Boolean) : [];
       if (/рассрочка/i.test(cleanedName) || /рассрочка/i.test(notes)) {
         if (!payTermsList.some(p => p.includes("Рассрочка"))) payTermsList.push("⏳ Рассрочка");
@@ -518,6 +521,7 @@
         if (!payTermsList.some(p => p.includes("Маткапитал"))) payTermsList.push("👨‍👩‍👧 Маткапитал");
       }
 
+      // Tags detection
       const tagList = tags ? tags.split(/\s+/).filter(Boolean) : [];
       if (/ЮВ/i.test(rawName) || /ЮВ/i.test(c.name || "") || notes.includes("ЮВ")) {
         if (!tagList.includes("#ЮВ")) tagList.push("#ЮВ");
