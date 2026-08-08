@@ -419,8 +419,13 @@
   </div>
 
   <script>
+    // Force purge old legacy localStorage keys to fix 176 contacts bug
+    ['realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_cloud_v2', 'realty_crm_clients', 'crm_clients', 'clients', 'realty_crm_clients_master_145'].forEach(k => {
+      try { localStorage.removeItem(k); } catch(e) {}
+    });
+
     const STORAGE_KEYS = [
-      'realty_crm_clients_master_145'
+      'realty_crm_clients_master_145_v3'
     ];
 
     const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
@@ -583,7 +588,7 @@
 
     function getAllLocalClients() {
       // Purge legacy local storage keys that caused duplicate contacts (176 vs 145)
-      ['realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_cloud_v2', 'realty_crm_clients', 'crm_clients', 'clients'].forEach(k => {
+      ['realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_cloud_v2', 'realty_crm_clients', 'crm_clients', 'clients', 'realty_crm_clients_master_145'].forEach(k => {
         try { localStorage.removeItem(k); } catch(e) {}
       });
 
