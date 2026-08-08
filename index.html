@@ -468,16 +468,16 @@
   <script>
     const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
 
-    // Absolute Purge of ALL legacy realty_crm LocalStorage keys to fix 169 contacts bug
+    // Absolute Purge of ALL legacy LocalStorage keys starting with realty_crm / crm_clients
     try {
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const k = localStorage.key(i);
-        if (k && (k.includes('realty_crm') || k.includes('crm_clients') || k.includes('clients'))) {
+        if (k && (k.startsWith('realty_crm') || k.startsWith('crm_clients') || k === 'clients')) {
           localStorage.removeItem(k);
         }
       }
     } catch(e) {}
-    const STORAGE_KEYS = ['realty_crm_clients_master_145_v10'];
+    const STORAGE_KEYS = ['realty_crm_master_145_v100'];
 
     const STATUS_MAP = {
       lead: 'Новый лид',
@@ -512,7 +512,7 @@
     let selectedPayTerms = [];
 
     let localClients = getAllLocalClients();
-    let clients = (Array.isArray(localClients) && localClients.length === 145) ? deduplicateClientsList(localClients) : INITIAL_CLIENTS;
+    let clients = INITIAL_CLIENTS;
     let tasks = (Array.isArray(getAllLocalTasks()) && getAllLocalTasks().length > 0) ? getAllLocalTasks() : INITIAL_TASKS;
     let comments = (Array.isArray(getAllLocalComments()) && getAllLocalComments().length > 0) ? getAllLocalComments() : INITIAL_COMMENTS;
 
