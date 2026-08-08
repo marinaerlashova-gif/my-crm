@@ -477,7 +477,7 @@
         }
       }
     } catch(e) {}
-    const STORAGE_KEYS = ['realty_crm_master_145_v500'];
+    const STORAGE_KEYS = ['realty_crm_master_145_v900'];
 
     const STATUS_MAP = {
       lead: 'Новый лид',
@@ -723,7 +723,7 @@
       if (res && res.ok) {
         try {
           const data = await res.json();
-          if (data && Array.isArray(data.clients) && data.clients.length === 145) {
+          if (data && Array.isArray(data.clients) && data.clients.length >= 145) {
             cloudData = data;
           }
         } catch(e) {}
@@ -731,7 +731,7 @@
 
       let mergedClients = deduplicateClientsList([...INITIAL_CLIENTS, ...((cloudData && cloudData.clients) || []), ...localClients]);
 
-      if (mergedClients.length !== 145) {
+      if (mergedClients.length < 145) {
         mergedClients = INITIAL_CLIENTS;
       }
 
