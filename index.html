@@ -723,6 +723,8 @@
       if (res && res.ok) {
         try {
           const data = await res.json();
+          // STRICT FILTER: Only accept cloud data if it contains AT LEAST 145 contacts!
+          // Reject outdated 130-contact responses from legacy cloud deployments.
           if (data && Array.isArray(data.clients) && data.clients.length >= 145) {
             cloudData = data;
           }
