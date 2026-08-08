@@ -3,41 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RealtyCRM Pro — Недвижимость</title>
+  <title>RealtyCRM Pro — Мобильная CRM для риелтора</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#1e293b">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f8fafc; color: #1e293b; padding-bottom: 60px; }
-    header { background: #1e293b; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .logo { font-size: 18px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
+    body { background-color: #f8fafc; color: #0f172a; padding-bottom: 70px; }
+    
+    /* Header */
+    header { background: #1e293b; color: white; padding: 12px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .logo { font-size: 18px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+    .header-actions { display: flex; gap: 8px; }
+    
+    .nav-tabs { display: flex; gap: 4px; border-top: 1px solid #334155; padding-top: 8px; overflow-x: auto; }
+    .nav-tab { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #94a3b8; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .nav-tab.active { background: #38bdf8; color: #0f172a; }
+    
     .container { max-width: 1200px; margin: 0 auto; padding: 12px; }
     
-    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .search-box { flex: 1; min-width: 200px; position: relative; }
-    .search-input { width: 100%; padding: 8px 12px 8px 32px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; }
-    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
-    
-    .btn { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+    /* Buttons */
+    .btn { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; text-decoration: none; }
     .btn-primary { background: #2563eb; color: white; }
     .btn-primary:hover { background: #1d4ed8; }
     .btn-secondary { background: #e2e8f0; color: #475569; }
+    .btn-secondary:hover { background: #cbd5e1; }
     .btn-emerald { background: #059669; color: white; }
+    .btn-emerald:hover { background: #047857; }
     
+    /* Dashboard Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    @media (max-width: 640px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card { background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stat-val { font-size: 20px; font-weight: 800; color: #0f172a; }
+    .stat-lbl { font-size: 11px; color: #64748b; margin-top: 2px; font-weight: 600; }
+    
+    /* Toolbar & Search */
+    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .search-box { flex: 1; min-width: 220px; position: relative; }
+    .search-input { width: 100%; padding: 8px 12px 8px 34px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; background: white; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+    
+    /* Filters */
     .filters-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; }
-    .filter-chip { padding: 4px 10px; border-radius: 16px; background: #e2e8f0; color: #475569; font-size: 12px; white-space: nowrap; cursor: pointer; border: 1px solid transparent; }
+    .filter-chip { padding: 5px 12px; border-radius: 16px; background: #e2e8f0; color: #475569; font-size: 12px; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
     .filter-chip.active { background: #2563eb; color: white; }
     
-    /* Client Card Desktop & Mobile Layout */
+    /* Grid Layout: 2 columns desktop, 1 column mobile */
     .client-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (max-width: 768px) {
-      .client-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 768px) { .client-grid { grid-template-columns: 1fr; } }
     
-    .client-card { background: white; border-radius: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    /* Client Card Compact Display */
+    .client-card { background: white; border-radius: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.1s, box-shadow 0.1s; }
+    .client-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
     .client-name { font-weight: 700; font-size: 15px; color: #0f172a; }
-    .role-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #475569; font-weight: 600; }
+    .role-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; color: #475569; font-weight: 600; margin-left: 6px; }
     
     .client-contact-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
     .client-contact-row a { text-decoration: none; color: #2563eb; font-weight: 600; }
@@ -47,10 +68,11 @@
     
     .client-params-inline { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
     .param-pill { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; }
-    .tag-badge { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 600; cursor: pointer; display: inline-block; }
+    .tag-badge { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 600; cursor: pointer; display: inline-block; margin-right: 2px; }
     
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid #f1f5f9; }
     
+    /* Status Badges */
     .status-tag { font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
     .status-lead { background: #e0f2fe; color: #0369a1; }
     .status-in_progress { background: #fef3c7; color: #92400e; }
@@ -61,10 +83,10 @@
     .status-no_answer { background: #f1f5f9; color: #64748b; }
     .status-not_relevant { background: #fee2e2; color: #991b1b; }
     
-    /* Modal Styles */
-    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(15,23,42,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 12px; }
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 12px; backdrop-filter: blur(2px); }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .modal-card { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 92vh; overflow-y: auto; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
     .modal-title { font-size: 16px; font-weight: 700; color: #0f172a; }
     .close-btn { font-size: 20px; border: none; background: none; cursor: pointer; color: #94a3b8; }
@@ -72,41 +94,282 @@
     .form-group { margin-bottom: 10px; }
     .form-label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
     .form-control { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; }
+    .form-control:focus { border-color: #2563eb; }
+    .chip-selector { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .chip-opt { padding: 4px 8px; border-radius: 6px; background: #f1f5f9; font-size: 11px; cursor: pointer; border: 1px solid #cbd5e1; font-weight: 600; }
+    .chip-opt.selected { background: #2563eb; color: white; border-color: #2563eb; }
+    
+    /* Kanban Board */
+    .kanban-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
+    .kanban-col { flex: 0 0 260px; background: #f1f5f9; border-radius: 10px; padding: 10px; border: 1px solid #e2e8f0; }
+    .kanban-head { font-weight: 700; font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="logo">🏢 RealtyCRM Pro</div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-emerald" onclick="openAddClientModal()">+ Клиент</button>
-      <button class="btn btn-primary" onclick="openAddTaskModal()">+ Задача</button>
+    <div class="header-top">
+      <div class="logo">🏢 RealtyCRM Pro</div>
+      <div class="header-actions">
+        <button class="btn btn-emerald" onclick="openClientModal()">+ Клиент</button>
+        <button class="btn btn-primary" onclick="openTaskModal()">+ Задача</button>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" id="tab-dashboard" onclick="switchTab('dashboard')">📊 Дашборд</div>
+      <div class="nav-tab" id="tab-clients" onclick="switchTab('clients')">👥 Клиенты</div>
+      <div class="nav-tab" id="tab-tasks" onclick="switchTab('tasks')">📅 Задачи & Календарь</div>
+      <div class="nav-tab" id="tab-kanban" onclick="switchTab('kanban')">📋 Канбан</div>
     </div>
   </header>
 
   <div class="container">
-    <div class="toolbar">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" class="search-input" placeholder="Поиск по имени, телефону, хэштегам #Аурум..." oninput="handleSearch()">
+    
+    <!-- DASHBOARD TAB -->
+    <div id="view-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-clients-count">0</div>
+          <div class="stat-lbl">Всего контактов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#2563eb;" id="stat-active-clients">0</div>
+          <div class="stat-lbl">В работе</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#059669;" id="stat-deals-count">0</div>
+          <div class="stat-lbl">Сделки</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#d97706;" id="stat-today-tasks">0</div>
+          <div class="stat-lbl">Задачи на сегодня</div>
+        </div>
       </div>
-      <button class="btn btn-secondary" onclick="recoverAllLocalContacts()">🎉 Восстановить контакты</button>
+
+      <div style="background:white; border-radius:10px; padding:12px; border:1px solid #e2e8f0; margin-bottom:16px;">
+        <div style="font-weight:700; font-size:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span>📅 Предстоящие задачи</span>
+          <button class="btn btn-secondary" style="font-size:11px; padding:2px 8px;" onclick="switchTab('tasks')">Все задачи ➔</button>
+        </div>
+        <div id="today-tasks-list"></div>
+      </div>
+
+      <div style="background:white; border-radius:10px; padding:12px; border:1px solid #e2e8f0;">
+        <div style="font-weight:700; font-size:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span>🔥 Последние активные клиенты</span>
+          <button class="btn btn-secondary" style="font-size:11px; padding:2px 8px;" onclick="switchTab('clients')">Все контакты ➔</button>
+        </div>
+        <div id="recent-clients-list"></div>
+      </div>
     </div>
 
-    <div class="filters-bar" id="filters-container">
-      <div class="filter-chip active" onclick="setFilter('all', this)">Все контакты</div>
-      <div class="filter-chip" onclick="setFilter('lead', this)">Новый лид</div>
-      <div class="filter-chip" onclick="setFilter('in_progress', this)">В работе</div>
-      <div class="filter-chip" onclick="setFilter('viewing', this)">Показы</div>
-      <div class="filter-chip" onclick="setFilter('negotiation', this)">Переговоры</div>
-      <div class="filter-chip" onclick="setFilter('deal', this)">Сделка</div>
-      <div class="filter-chip" onclick="setFilter('purchased', this)">Уже купили</div>
+    <!-- CLIENTS TAB -->
+    <div id="view-clients" style="display:none;">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Поиск по имени, телефону, хэштегам #Аурум..." oninput="render()">
+        </div>
+        <button class="btn btn-secondary" onclick="recoverAllLocalContacts()">🎉 Восстановить контакты</button>
+        <button class="btn btn-secondary" style="color:#dc2626;" onclick="deleteTestContacts()">🧹 Сбросить тест</button>
+      </div>
+
+      <div class="filters-bar" id="filters-container">
+        <div class="filter-chip active" onclick="setFilter('all', this)">Все контакты</div>
+        <div class="filter-chip" onclick="setFilter('lead', this)">Новый лид</div>
+        <div class="filter-chip" onclick="setFilter('in_progress', this)">В работе</div>
+        <div class="filter-chip" onclick="setFilter('viewing', this)">Показы</div>
+        <div class="filter-chip" onclick="setFilter('negotiation', this)">Переговоры</div>
+        <div class="filter-chip" onclick="setFilter('deal', this)">Сделка</div>
+        <div class="filter-chip" onclick="setFilter('purchased', this)">Уже купили</div>
+        <div class="filter-chip" onclick="setFilter('no_answer', this)">📵 Не отвечает</div>
+        <div class="filter-chip" onclick="setFilter('not_relevant', this)">❌ Не актуально</div>
+      </div>
+
+      <div class="client-grid" id="clients-container"></div>
     </div>
 
-    <div class="client-grid" id="clients-container"></div>
+    <!-- TASKS TAB -->
+    <div id="view-tasks" style="display:none;">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="openTaskModal()">+ Создать задачу</button>
+        <select id="task-filter-status" class="form-control" style="width:auto;" onchange="renderAllTasks()">
+          <option value="all">Все задачи</option>
+          <option value="pending" selected>Запланированные</option>
+          <option value="completed">Выполненные</option>
+        </select>
+      </div>
+      <div id="tasks-full-list"></div>
+    </div>
+
+    <!-- KANBAN TAB -->
+    <div id="view-kanban" style="display:none;">
+      <div class="kanban-grid" id="kanban-container"></div>
+    </div>
+
   </div>
 
-  <!-- Detail Client Modal -->
+  <!-- Client Add/Edit Modal -->
+  <div class="modal-overlay" id="client-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="client-modal-title">Добавить клиента</div>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+      <form id="client-form" onsubmit="saveClient(event)">
+        <input type="hidden" id="edit-client-id">
+        <div class="form-group">
+          <label class="form-label">ФИО / Имя клиента *</label>
+          <input type="text" id="client-name" class="form-control" placeholder="Иванова Анна" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Телефон *</label>
+          <input type="tel" id="client-phone" class="form-control" placeholder="+7 (911) 234-56-78" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div class="form-group">
+            <label class="form-label">Роль</label>
+            <select id="client-type" class="form-control">
+              <option value="buyer">Покупатель</option>
+              <option value="seller">Продавец</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Статус воронки</label>
+            <select id="client-status" class="form-control">
+              <option value="lead">Новый лид</option>
+              <option value="in_progress">В работе</option>
+              <option value="viewing">Показы</option>
+              <option value="negotiation">Переговоры</option>
+              <option value="deal">Сделка</option>
+              <option value="purchased">Уже купили</option>
+              <option value="no_answer">📵 Не отвечает</option>
+              <option value="not_relevant">❌ Не актуально</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+          <div class="form-group">
+            <label class="form-label">Бюджет (₽)</label>
+            <input type="text" id="client-budget" class="form-control" placeholder="10 000 000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ПВ (₽)</label>
+            <input type="text" id="client-initial-payment" class="form-control" placeholder="2 000 000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Платеж/мес (₽)</label>
+            <input type="text" id="client-monthly-payment" class="form-control" placeholder="50 000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Запрос по недвижимости / Объекту</label>
+          <input type="text" id="client-property" class="form-control" placeholder="ЖК Аурум, 2к квартира">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Условия покупки / Быстрые теги</label>
+          <input type="text" id="client-payment-terms" class="form-control" placeholder="Ипотека 5.4%, Рассрочка" oninput="syncPaymentChipsFromInput()">
+          <div class="chip-selector" id="payment-chips">
+            <div class="chip-opt" onclick="togglePaymentChip('💵 Наличные')">💵 Наличные</div>
+            <div class="chip-opt" onclick="togglePaymentChip('🏦 Ипотека')">🏦 Ипотека</div>
+            <div class="chip-opt" onclick="togglePaymentChip('🚫 Без ПВ')">🚫 Без ПВ</div>
+            <div class="chip-opt" onclick="togglePaymentChip('👨‍👩‍👧 Маткапитал')">👨‍👩‍👧 Маткапитал</div>
+            <div class="chip-opt" onclick="togglePaymentChip('📜 Субсидия')">📜 Субсидия</div>
+            <div class="chip-opt" onclick="togglePaymentChip('⏳ Рассрочка')">⏳ Рассрочка</div>
+            <div class="chip-opt" onclick="togglePaymentChip('📜 Транш')">📜 Транш</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Срочность лида</label>
+          <select id="client-urgency" class="form-control">
+            <option value="normal">Обычная</option>
+            <option value="urgent">🔥 Срочно</option>
+            <option value="month">⚡ До месяца</option>
+            <option value="future">🧊 На будущее</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Примечания / Хэштеги</label>
+          <textarea id="client-notes" class="form-control" rows="2" placeholder="Заметки, предпочтения, #Аурум..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; gap:8px; margin-top:12px;">
+          <button type="button" class="btn btn-emerald" onclick="openTaskModalFromClientForm()">📅 + Назначить задачу</button>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn btn-secondary" onclick="closeModals()">Отмена</button>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Task Add/Edit Modal -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="task-modal-title">Создать задачу</div>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+      <form id="task-form" onsubmit="saveTask(event)">
+        <input type="hidden" id="edit-task-id">
+        <div class="form-group">
+          <label class="form-label">Привязать к клиенту</label>
+          <select id="task-client-id" class="form-control">
+            <option value="">-- Без привязки --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Название задачи / Встречи *</label>
+          <input type="text" id="task-title" class="form-control" placeholder="Показ ЖК Ultra City" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div class="form-group">
+            <label class="form-label">Тип мероприятия</label>
+            <select id="task-type" class="form-control">
+              <option value="call">📞 Звонок</option>
+              <option value="viewing">👁 Показ</option>
+              <option value="meeting">🤝 Встреча</option>
+              <option value="document">📜 Документы</option>
+              <option value="other">📌 Другое</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Дата</label>
+            <input type="date" id="task-date" class="form-control" required>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div class="form-group">
+            <label class="form-label">Время</label>
+            <input type="time" id="task-time" class="form-control" value="12:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Статус</label>
+            <select id="task-status" class="form-control">
+              <option value="pending">Запланировано</option>
+              <option value="completed">Выполнено</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Детали / Примечания</label>
+          <textarea id="task-notes" class="form-control" rows="2" placeholder="Забрать ключи, адрес..."></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModals()">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить задачу</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail Profile Modal -->
   <div class="modal-overlay" id="detail-modal">
     <div class="modal-card">
       <div class="modal-header">
@@ -118,7 +381,13 @@
   </div>
 
   <script>
-    const STORAGE_KEYS = ['realty_crm_clients_v2', 'realty_crm_clients_v3', 'realty_crm_clients_cloud_v2', 'realty_crm_clients'];
+    const STORAGE_KEYS = [
+      'realty_crm_clients_v2',
+      'realty_crm_clients_v3',
+      'realty_crm_clients_cloud_v2',
+      'realty_crm_clients'
+    ];
+
     const RENDER_CLOUD_URL = 'https://marina-crm.onrender.com/api/db';
 
     const STATUS_MAP = {
@@ -130,6 +399,14 @@
       purchased: 'Уже купили',
       no_answer: '📵 Не отвечает',
       not_relevant: '❌ Не актуально'
+    };
+
+    const TASK_TYPE_ICONS = {
+      call: '📞',
+      viewing: '👁',
+      meeting: '🤝',
+      document: '📜',
+      other: '📌'
     };
 
     let clients = [];
@@ -235,6 +512,8 @@
           if (c.name && (!existing.name || existing.name === 'Без имени')) existing.name = c.name;
           if (c.phone && !existing.phone) existing.phone = c.phone;
           if (c.budget) existing.budget = c.budget;
+          if (c.initialPayment) existing.initialPayment = c.initialPayment;
+          if (c.monthlyPayment) existing.monthlyPayment = c.monthlyPayment;
           if (c.property) existing.property = c.property;
           if (c.notes) {
             if (!existing.notes) existing.notes = c.notes;
@@ -251,33 +530,244 @@
       return Array.from(uniqueMap.values());
     }
 
-    async function loadCloudData() {
+    function getAllLocalClients() {
+      const allClients = [];
+      STORAGE_KEYS.forEach(key => {
+        try {
+          const item = localStorage.getItem(key);
+          if (item) {
+            const arr = JSON.parse(item);
+            if (Array.isArray(arr)) {
+              arr.forEach(c => {
+                if (c && (c.name || c.phone)) allClients.push(cleanClientObject(c));
+              });
+            }
+          }
+        } catch(e) {}
+      });
+      return allClients;
+    }
+
+    function getAllLocalTasks() {
       try {
-        const res = await fetch(RENDER_CLOUD_URL);
-        if (res && res.ok) {
+        const item = localStorage.getItem('realty_crm_tasks_cloud_v2');
+        return item ? JSON.parse(item) : [];
+      } catch(e) { return []; }
+    }
+
+    function getAllLocalComments() {
+      try {
+        const item = localStorage.getItem('realty_crm_comments_cloud_v2');
+        return item ? JSON.parse(item) : [];
+      } catch(e) { return []; }
+    }
+
+    function recoverAllLocalContacts() {
+      const foundClients = getAllLocalClients();
+      if (!foundClients.length) {
+        alert('Локальных сохранений не найдено.');
+        return;
+      }
+      clients = deduplicateClientsList([...foundClients, ...clients]);
+      saveDataLocally();
+      pushLocalToCloud();
+      render();
+      alert(`🎉 Успешно восстановлено контактов: ${clients.length}`);
+    }
+
+    function deleteTestContacts() {
+      if (!confirm('Вы уверены, что хотите сбросить тестовые данные?')) return;
+      clients = clients.filter(c => c && !['cli-1', 'cli-2', 'cli-3', 'cli-4', 'cli-5'].includes(c.id));
+      saveDataLocally();
+      pushLocalToCloud();
+      render();
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 2000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (err) {
+        clearTimeout(id);
+        return null;
+      }
+    }
+
+    async function loadCloudData() {
+      const localClients = getAllLocalClients();
+      const localTasks = getAllLocalTasks();
+      const localComments = getAllLocalComments();
+
+      let cloudData = null;
+      const primaryUrl = (window.location.hostname.includes('onrender.com')) ? '/api/db' : RENDER_CLOUD_URL;
+
+      const res = await fetchWithTimeout(primaryUrl);
+      if (res && res.ok) {
+        try {
           const data = await res.json();
           if (data && Array.isArray(data.clients) && data.clients.length > 0) {
-            clients = deduplicateClientsList(data.clients);
-            tasks = data.tasks || [];
-            comments = data.comments || [];
-            render();
+            cloudData = data;
           }
+        } catch(e) {}
+      }
+
+      if (cloudData && Array.isArray(cloudData.clients)) {
+        clients = deduplicateClientsList([...localClients, ...cloudData.clients]);
+        
+        const taskMap = new Map();
+        [...localTasks, ...(cloudData.tasks || []), ...tasks].forEach(t => {
+          if (t && (t.id || t.title)) taskMap.set(t.id || ('t_' + t.title), t);
+        });
+        tasks = Array.from(taskMap.values());
+
+        const comMap = new Map();
+        [...localComments, ...(cloudData.comments || []), ...comments].forEach(c => {
+          if (c && (c.id || c.text)) comMap.set(c.id || ('c_' + c.text), c);
+        });
+        comments = Array.from(comMap.values());
+
+        saveDataLocally();
+        render();
+      } else if (localClients.length > 0) {
+        clients = deduplicateClientsList(localClients);
+        saveDataLocally();
+        render();
+      }
+    }
+
+    function saveDataLocally() {
+      STORAGE_KEYS.forEach(key => {
+        try { localStorage.setItem(key, JSON.stringify(clients)); } catch(e) {}
+      });
+      try { localStorage.setItem('realty_crm_tasks_cloud_v2', JSON.stringify(tasks)); } catch(e) {}
+      try { localStorage.setItem('realty_crm_comments_cloud_v2', JSON.stringify(comments)); } catch(e) {}
+    }
+
+    async function pushLocalToCloud() {
+      if (!clients || clients.length === 0) return;
+      
+      const compactClients = clients.map(c => {
+        const obj = {};
+        for (const [k, v] of Object.entries(c)) {
+          if (v !== "" && v !== null && v !== undefined) obj[k] = v;
         }
-      } catch(e) {}
+        return obj;
+      });
+
+      const payload = JSON.stringify({ clients: compactClients, tasks, comments });
+      const primaryUrl = (window.location.hostname.includes('onrender.com')) ? '/api/db' : RENDER_CLOUD_URL;
+
+      try {
+        await fetchWithTimeout(primaryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        });
+      } catch (err) {}
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      const activeTabEl = document.getElementById('tab-' + tab);
+      if (activeTabEl) activeTabEl.classList.add('active');
+
+      document.getElementById('view-dashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
+      document.getElementById('view-clients').style.display = tab === 'clients' ? 'block' : 'none';
+      document.getElementById('view-tasks').style.display = tab === 'tasks' ? 'block' : 'none';
+      document.getElementById('view-kanban').style.display = tab === 'kanban' ? 'block' : 'none';
+
+      render();
+    }
+
+    function renderStats() {
+      try {
+        const clientsList = clients || [];
+        document.getElementById('stat-clients-count').innerText = clientsList.length;
+        document.getElementById('stat-active-clients').innerText = clientsList.filter(c => c && c.status !== 'deal' && c.status !== 'purchased' && c.status !== 'not_relevant').length;
+        document.getElementById('stat-deals-count').innerText = clientsList.filter(c => c && c.status === 'deal').length;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayTasks = (tasks || []).filter(t => t && t.date === todayStr && !t.done);
+        document.getElementById('stat-today-tasks').innerText = todayTasks.length;
+      } catch (err) {}
+    }
+
+    function renderTodayTasks() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const container = document.getElementById('today-tasks-list');
+      const todayTasks = tasks.filter(t => t.date === todayStr);
+
+      if (!todayTasks.length) {
+        container.innerHTML = '<div style="text-align:center; padding:16px; color:#94a3b8; font-size:13px;">На сегодня нет невыполненных задач.</div>';
+        return;
+      }
+
+      container.innerHTML = todayTasks.map(t => {
+        const client = clients.find(c => c.id === t.clientId);
+        return `
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:8px; margin-bottom:6px; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} ${client ? '— ' + client.name : ''}</div>
+              <div style="color:#64748b; font-size:11px; margin-top:2px;">🕒 ${t.time || '12:00'} ${t.notes ? '• ' + t.notes : ''}</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-emerald" style="font-size:11px; padding:3px 8px;" onclick="toggleTask('${t.id}')">✓ Готово</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRecentClients() {
+      const container = document.getElementById('recent-clients-list');
+      const recent = clients.slice(0, 5);
+      if (!recent.length) {
+        container.innerHTML = '<div style="text-align:center; padding:16px; color:#94a3b8; font-size:13px;">Контактов пока нет</div>';
+        return;
+      }
+      container.innerHTML = recent.map(c => `
+        <div style="padding:8px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openDetailModal('${c.id}')">
+          <div>
+            <div style="font-weight:700; font-size:13px;">${c.name}</div>
+            <div style="color:#64748b; font-size:11px;">📞 ${c.phone || 'Нет телефона'}</div>
+          </div>
+          <span class="status-tag status-${c.status || 'lead'}">${STATUS_MAP[c.status || 'lead']}</span>
+        </div>
+      `).join('');
     }
 
     function cleanPhone(p) {
       return String(p || '').replace(/\D/g, '');
     }
 
-    function render() {
+    function renderClients() {
       const container = document.getElementById('clients-container');
       if (!container) return;
 
+      const query = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+
       const filtered = clients.filter(c => {
+        if (!c) return false;
         if (currentFilter !== 'all' && c.status !== currentFilter) return false;
+
+        if (query) {
+          const matchName = String(c.name || '').toLowerCase().includes(query);
+          const matchPhone = cleanPhone(c.phone).includes(query);
+          const matchTags = String(c.tags || '').toLowerCase().includes(query);
+          const matchNotes = String(c.notes || '').toLowerCase().includes(query);
+          const matchProp = String(c.property || '').toLowerCase().includes(query);
+          return matchName || matchPhone || matchTags || matchNotes || matchProp;
+        }
         return true;
       });
+
+      if (!filtered.length) {
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#94a3b8; font-size:14px;">Контакты не найдены</div>';
+        return;
+      }
 
       container.innerHTML = filtered.map(c => {
         const purePhone = cleanPhone(c.phone);
@@ -309,14 +799,234 @@
               </div>
             ` : ''}
 
-            ${c.notes ? `<div style="font-size:12px; color:#475569; margin-top:6px; line-height:1.3; background:#f8fafc; padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0;">📝 ${c.notes}</div>` : ''}
+            ${c.notes ? `<div style="font-size:12px; color:#475569; margin-top:6px; line-height:1.3; background:#f8fafc; padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">📝 ${c.notes}</div>` : ''}
 
             <div class="card-footer">
               <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); openDetailModal('${c.id}')">👁 Профиль & Задачи</button>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px;" onclick="event.stopPropagation(); openEditClientModal('${c.id}')">✏️ Изменить</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:3px 8px; color:#dc2626;" onclick="event.stopPropagation(); deleteClient('${c.id}')">Удалить</button>
+              </div>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    function renderAllTasks() {
+      const container = document.getElementById('tasks-full-list');
+      const stFilter = document.getElementById('task-filter-status')?.value || 'all';
+
+      const filtered = tasks.filter(t => {
+        if (stFilter === 'pending') return !t.done;
+        if (stFilter === 'completed') return t.done;
+        return true;
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:14px;">Задач в этом разделе нет</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(t => {
+        const client = clients.find(c => c.id === t.clientId);
+        return `
+          <div style="background:white; border:1px solid #e2e8f0; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div style="font-weight:700; font-size:14px;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} ${client ? '— ' + client.name : ''}</div>
+              <div style="color:#64748b; font-size:12px; margin-top:2px;">📅 ${t.date || ''} в ${t.time || '12:00'} ${t.notes ? '• ' + t.notes : ''}</div>
+            </div>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditTaskModal('${t.id}')">✏️ Изменить</button>
+              <button class="btn btn-secondary" style="font-size:10px; padding:4px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
+              <button class="btn btn-emerald" style="font-size:11px; padding:4px 8px;" onclick="toggleTask('${t.id}')">${t.done ? '✓ Выполнено' : 'Отметить готовой'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderKanban() {
+      const container = document.getElementById('kanban-container');
+      if (!container) return;
+
+      const stages = [
+        { key: 'lead', title: 'Новый лид' },
+        { key: 'in_progress', title: 'В работе' },
+        { key: 'viewing', title: 'Показы' },
+        { key: 'negotiation', title: 'Переговоры' },
+        { key: 'deal', title: 'Сделка' }
+      ];
+
+      container.innerHTML = stages.map(st => {
+        const stageClients = clients.filter(c => (c.status || 'lead') === st.key);
+        return `
+          <div class="kanban-col">
+            <div class="kanban-head">
+              <span>${st.title}</span>
+              <span style="background:#e2e8f0; padding:2px 6px; border-radius:10px; font-size:11px;">${stageClients.length}</span>
+            </div>
+            ${stageClients.map(c => `
+              <div style="background:white; border-radius:8px; padding:8px 10px; margin-bottom:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="openDetailModal('${c.id}')">
+                <div style="font-weight:700; font-size:13px;">${c.name}</div>
+                <div style="font-size:11px; color:#64748b; margin-top:2px;">📞 ${c.phone || 'Нет телефона'}</div>
+                ${c.property ? `<div style="font-size:11px; color:#2563eb; margin-top:2px;">🏢 ${c.property}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function render() {
+      renderStats();
+      renderTodayTasks();
+      renderRecentClients();
+      renderClients();
+      renderAllTasks();
+      renderKanban();
+    }
+
+    function toggleTask(id) {
+      const t = tasks.find(x => x.id === id);
+      if (t) {
+        t.done = !t.done;
+        saveDataLocally();
+        pushLocalToCloud();
+        render();
+      }
+    }
+
+    function deleteClient(id) {
+      if (!confirm('Удалить этого клиента?')) return;
+      clients = clients.filter(c => c.id !== id);
+      saveDataLocally();
+      pushLocalToCloud();
+      render();
+    }
+
+    function openClientModal() {
+      document.getElementById('client-modal-title').innerText = 'Добавить клиента';
+      document.getElementById('edit-client-id').value = '';
+      document.getElementById('client-form').reset();
+      document.getElementById('client-modal').classList.add('active');
+    }
+
+    function openEditClientModal(id) {
+      const c = clients.find(x => x.id === id);
+      if (!c) return;
+
+      document.getElementById('client-modal-title').innerText = 'Редактировать клиента';
+      document.getElementById('edit-client-id').value = c.id;
+      document.getElementById('client-name').value = c.name || '';
+      document.getElementById('client-phone').value = c.phone || '';
+      document.getElementById('client-type').value = c.type || 'buyer';
+      document.getElementById('client-status').value = c.status || 'lead';
+      document.getElementById('client-budget').value = c.budget || '';
+      document.getElementById('client-initial-payment').value = c.initialPayment || '';
+      document.getElementById('client-monthly-payment').value = c.monthlyPayment || '';
+      document.getElementById('client-property').value = c.property || '';
+      document.getElementById('client-payment-terms').value = c.paymentTerms || '';
+      document.getElementById('client-urgency').value = c.urgency || 'normal';
+      document.getElementById('client-notes').value = c.notes || '';
+
+      document.getElementById('client-modal').classList.add('active');
+    }
+
+    function saveClient(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-client-id').value;
+      const name = document.getElementById('client-name').value;
+      const phone = document.getElementById('client-phone').value;
+
+      let clientObj = id ? clients.find(x => x.id === id) : { id: 'cli-' + Date.now() + Math.random() };
+
+      clientObj.name = name;
+      clientObj.phone = phone;
+      clientObj.type = document.getElementById('client-type').value;
+      clientObj.status = document.getElementById('client-status').value;
+      clientObj.budget = document.getElementById('client-budget').value;
+      clientObj.initialPayment = document.getElementById('client-initial-payment').value;
+      clientObj.monthlyPayment = document.getElementById('client-monthly-payment').value;
+      clientObj.property = document.getElementById('client-property').value;
+      clientObj.paymentTerms = document.getElementById('client-payment-terms').value;
+      clientObj.urgency = document.getElementById('client-urgency').value;
+      clientObj.notes = document.getElementById('client-notes').value;
+
+      clientObj = cleanClientObject(clientObj);
+
+      if (!id) clients.unshift(clientObj);
+
+      saveDataLocally();
+      pushLocalToCloud();
+      closeModals();
+      render();
+    }
+
+    function openTaskModal(clientId = '') {
+      document.getElementById('task-modal-title').innerText = 'Создать задачу';
+      document.getElementById('edit-task-id').value = '';
+      document.getElementById('task-form').reset();
+
+      populateTaskClientDropdown();
+      if (clientId) document.getElementById('task-client-id').value = clientId;
+
+      document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('task-modal').classList.add('active');
+    }
+
+    function openEditTaskModal(taskId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      document.getElementById('task-modal-title').innerText = 'Редактировать задачу';
+      document.getElementById('edit-task-id').value = t.id;
+
+      populateTaskClientDropdown();
+      document.getElementById('task-client-id').value = t.clientId || '';
+      document.getElementById('task-title').value = t.title || '';
+      document.getElementById('task-type').value = t.type || 'call';
+      document.getElementById('task-date').value = t.date || '';
+      document.getElementById('task-time').value = t.time || '12:00';
+      document.getElementById('task-status').value = t.done ? 'completed' : 'pending';
+      document.getElementById('task-notes').value = t.notes || '';
+
+      document.getElementById('task-modal').classList.add('active');
+    }
+
+    function populateTaskClientDropdown() {
+      const dropdown = document.getElementById('task-client-id');
+      dropdown.innerHTML = '<option value="">-- Без привязки --</option>' + clients.map(c => `
+        <option value="${c.id}">${c.name} (${c.phone || ''})</option>
+      `).join('');
+    }
+
+    function openTaskModalFromClientForm() {
+      saveClient(new Event('submit'));
+      const newOrEditedId = document.getElementById('edit-client-id').value || clients[0]?.id;
+      openTaskModal(newOrEditedId);
+    }
+
+    function saveTask(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-task-id').value;
+
+      let taskObj = id ? tasks.find(x => x.id === id) : { id: 't-' + Date.now() };
+
+      taskObj.clientId = document.getElementById('task-client-id').value;
+      taskObj.title = document.getElementById('task-title').value;
+      taskObj.type = document.getElementById('task-type').value;
+      taskObj.date = document.getElementById('task-date').value;
+      taskObj.time = document.getElementById('task-time').value;
+      taskObj.done = document.getElementById('task-status').value === 'completed';
+      taskObj.notes = document.getElementById('task-notes').value;
+
+      if (!id) tasks.unshift(taskObj);
+
+      saveDataLocally();
+      pushLocalToCloud();
+      closeModals();
+      render();
     }
 
     function openDetailModal(clientId) {
@@ -325,16 +1035,53 @@
 
       document.getElementById('detail-client-name').innerText = client.name || 'Без имени';
       let clientComments = comments.filter(c => c && c.clientId === clientId);
+      const clientTasks = tasks.filter(t => t && t.clientId === clientId);
 
       const modalBody = document.getElementById('detail-modal-body');
       const purePhone = cleanPhone(client.phone);
 
       modalBody.innerHTML = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:8px; margin-bottom:12px;">
-          <div>📞 Телефон: <strong>${client.phone || 'Не указан'}</strong></div>
-          ${client.budget ? `<div>💰 Бюджет: <strong>${client.budget}</strong></div>` : ''}
-          ${client.paymentTerms ? `<div>💳 Условия: <strong>${client.paymentTerms}</strong></div>` : ''}
-          ${client.notes ? `<div style="margin-top:6px; background:#fff; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">📝 ${client.notes}</div>` : ''}
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:10px; margin-bottom:14px; font-size:13px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+            <span class="status-tag status-${client.status || 'lead'}">${STATUS_MAP[client.status || 'lead']}</span>
+            <div>
+              ${purePhone ? `
+                <a href="https://api.whatsapp.com/send?phone=${purePhone}" target="_blank" class="social-btn wa-btn">WhatsApp</a>
+                <a href="https://t.me/+${purePhone}" target="_blank" class="social-btn tg-btn">Telegram</a>
+              ` : ''}
+            </div>
+          </div>
+          <div>📞 Телефон: <strong>${client.phone ? `<a href="tel:${purePhone}">${client.phone}</a>` : 'Не указан'}</strong></div>
+          ${client.budget ? `<div style="margin-top:2px;">💰 Бюджет: <strong>${client.budget}</strong></div>` : ''}
+          ${client.paymentTerms ? `<div style="margin-top:2px;">💳 Условия: <strong>${client.paymentTerms}</strong></div>` : ''}
+          ${client.property ? `<div style="margin-top:2px;">🏢 Запрос: <strong>${client.property}</strong></div>` : ''}
+          ${client.notes ? `<div style="margin-top:6px; background:#fff; padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0;">📝 ${client.notes}</div>` : ''}
+
+          <div style="margin-top:10px; display:flex; gap:6px; border-top:1px solid #e2e8f0; padding-top:8px;">
+            <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="openEditClientModal('${client.id}')">✏️ Редактировать</button>
+            <button class="btn btn-emerald" style="font-size:11px; padding:4px 8px;" onclick="openTaskModal('${client.id}')">📅 + Запланировать задачу</button>
+          </div>
+        </div>
+
+        <h4 style="font-size:14px; font-weight:700; margin-bottom:8px;">📅 Задачи клиента (${clientTasks.length})</h4>
+        <div style="margin-bottom:14px;">
+          ${clientTasks.map(t => `
+            <div style="background:white; border:1px solid #e2e8f0; padding:8px 10px; border-radius:8px; margin-bottom:4px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:700;">${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title}</div>
+                <div style="color:#64748b; font-size:11px;">📅 ${t.date || ''} в ${t.time || '12:00'}</div>
+              </div>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-secondary" style="font-size:10px; padding:2px 6px;" onclick="exportTaskToGoogleCalendar('${t.id}')">🌐 Google</button>
+              </div>
+            </div>
+          `).join('') || '<div style="color:#94a3b8; font-size:12px; font-style:italic;">Задач по клиенту нет</div>'}
+        </div>
+
+        <h4 style="font-size:14px; font-weight:700; margin-bottom:6px;">💬 Добавить заметку</h4>
+        <div style="display:flex; gap:6px; margin-bottom:14px;">
+          <input type="text" id="new-comment-input" class="form-control" placeholder="Результат звонка или встречи...">
+          <button class="btn btn-primary" onclick="addComment('${client.id}')">Отправить</button>
         </div>
 
         <h4 style="font-size:14px; font-weight:700; margin-bottom:8px;">📜 История заметок (${clientComments.length})</h4>
@@ -351,8 +1098,60 @@
       document.getElementById('detail-modal').classList.add('active');
     }
 
-    function closeModals() {
-      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    function addComment(clientId) {
+      const input = document.getElementById('new-comment-input');
+      if (!input || !input.value.trim()) return;
+
+      const newCom = {
+        id: 'com-' + Date.now(),
+        clientId: clientId,
+        text: input.value.trim(),
+        date: new Date().toLocaleString('ru-RU'),
+        author: 'Марина'
+      };
+
+      comments.unshift(newCom);
+      saveDataLocally();
+      pushLocalToCloud();
+      openDetailModal(clientId);
+    }
+
+    function exportTaskToGoogleCalendar(taskId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      const client = clients.find(c => c.id === t.clientId);
+      const title = encodeURIComponent(`${TASK_TYPE_ICONS[t.type] || '📌'} ${t.title} — ${client ? client.name : ''}`);
+      const details = encodeURIComponent(`Клиент: ${client ? client.name + ' (' + client.phone + ')' : 'Не указан'}\nБюджет: ${client?.budget || ''}\nЗапрос: ${client?.property || ''}\nЗаметка: ${t.notes || ''}`);
+
+      const startTime = t.date ? t.date.replace(/-/g, '') + 'T' + (t.time || '12:00').replace(':', '') + '00' : '';
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${startTime}/${startTime}`;
+
+      window.open(url, '_blank');
+    }
+
+    function togglePaymentChip(val) {
+      const input = document.getElementById('client-payment-terms');
+      let current = input.value ? input.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
+      if (current.includes(val)) {
+        current = current.filter(x => x !== val);
+      } else {
+        current.push(val);
+      }
+      input.value = current.join(', ');
+      syncPaymentChipsFromInput();
+    }
+
+    function syncPaymentChipsFromInput() {
+      const inputVal = document.getElementById('client-payment-terms')?.value || '';
+      document.querySelectorAll('#payment-chips .chip-opt').forEach(chip => {
+        const text = (chip.innerText || chip.textContent || '').trim();
+        if (inputVal.includes(text)) {
+          chip.classList.add('selected');
+        } else {
+          chip.classList.remove('selected');
+        }
+      });
     }
 
     function setFilter(status, el) {
@@ -360,6 +1159,10 @@
       document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
       if (el) el.classList.add('active');
       render();
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
     }
 
     window.onload = () => {
